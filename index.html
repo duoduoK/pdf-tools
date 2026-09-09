@@ -40242,16 +40242,19 @@ function pairsFor(mode, total){
 }
 
 // 兼容各浏览器的下载（含内置浏览器兜底）
-function doDownload(blob, filename, fallback){
-  if (fallback === undefined) fallback = true;
+function doDownload(blob, filename){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { try { document.body.removeChild(a); } catch(e){} }, 1000);
-  // 兜底：部分内置浏览器忽略 a.download，尝试在新标签页打开让用户手动保存
-  if (fallback) setTimeout(() => {
+  // 兜底仅针对移动端内置浏览器（iOS/Android 微信/QQ）才需要；
+  // 桌面与常规手机浏览器用 a.click() 已能正常下载，再开新标签页会造成重复保存，故此处限制条件
+  const ua2 = navigator.userAgent.toLowerCase();
+  const isMobile = /android|iphone|ipad|ipod|mobile|harmonyos|openharmony/.test(ua2);
+  const needFallback = isMobile && (inWeChat || inQQ);
+  if (needFallback) setTimeout(() => {
     const w = window.open(url, '_blank');
     if (w) msgEl.textContent += '\n（若未自动下载，请在打开的新标签页中保存该 PDF）';
     setTimeout(() => URL.revokeObjectURL(url), 8000);
