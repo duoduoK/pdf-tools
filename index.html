@@ -39849,12 +39849,23 @@
       <input type="number" id="spine" class="num" min="0" step="0.5" value="6" placeholder="例如 6">
 
       <p class="label">⑤ 书脊颜色</p>
-      <input type="color" id="spineColor" class="num" value="#333333" style="height:44px;padding:4px;cursor:pointer">
+      <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;font-size:13px;color:var(--sub)">
+        <label style="display:flex;flex-direction:column;gap:4px;cursor:pointer">颜色
+          <input type="color" id="spineFrom" value="#6b8cae" style="width:54px;height:34px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer;padding:2px">
+        </label>
+        <label id="spineToWrap" style="display:flex;flex-direction:column;gap:4px;cursor:pointer">渐变结束色
+          <input type="color" id="spineTo" value="#2c3e6b" style="width:54px;height:34px;border:1px solid var(--line);border-radius:8px;background:none;cursor:pointer;padding:2px">
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;padding-bottom:6px"><input type="checkbox" id="spineGrad"> 用渐变（上下渐变：颜色→结束色）</label>
+      </div>
 
       <p class="label">⑥ 书脊文字（可选，距顶 5mm 起排；句首加空格可下移）</p>
       <input type="text" id="spineText" class="txt" placeholder="留空则不印字，例如：书名 · 作者">
 
-      <p class="label">⑦ 导出方式（书皮始终按真实尺寸，不缩放）</p>
+      <p class="label" style="margin-top:10px">⑦ 序列号（可选，书脊底部正放；句首加空格可上移；留空不印）</p>
+      <input type="text" id="spineSn" class="txt" placeholder="留空则不印，例如：No.001 / A-03">
+
+      <p class="label" style="margin-top:10px">⑧ 导出方式（书皮始终按真实尺寸，不缩放）</p>
       <select id="paper" class="num" style="height:44px;cursor:pointer">
         <option value="none">书皮实际尺寸（不嵌入纸张）</option>
         <option value="a3">嵌入到 A3（297×420mm）</option>
@@ -39952,7 +39963,26 @@ const coverNEl   = document.getElementById('coverName');
 const backNEl    = document.getElementById('backName');
 const spineEl    = document.getElementById('spine');
 const spineTxtEl = document.getElementById('spineText');
-const spineColEl = document.getElementById('spineColor');
+const spineSnEl  = document.getElementById('spineSn');
+// 书脊颜色：直接用原生取色框自定义（颜色 = 纯色；勾选“用渐变”后 颜色→结束色 做上下渐变）。
+const spineFromEl = document.getElementById('spineFrom');
+const spineToEl   = document.getElementById('spineTo');
+const spineToWrap = document.getElementById('spineToWrap');
+const spineGradChk= document.getElementById('spineGrad');
+let spineFill = { type:'solid', color: spineFromEl.value };
+function updateSpineFill(){
+  spineFill = spineGradChk.checked
+    ? { type:'gradient', from: spineFromEl.value, to: spineToEl.value }
+    : { type:'solid', color: spineFromEl.value };
+}
+spineFromEl.addEventListener('input', updateSpineFill);
+spineToEl.addEventListener('input', function(){ if (spineGradChk.checked) updateSpineFill(); });
+spineGradChk.addEventListener('change', function(){
+  spineToWrap.style.display = spineGradChk.checked ? 'flex' : 'none';
+  updateSpineFill();
+});
+spineToWrap.style.display = spineGradChk.checked ? 'flex' : 'none';
+updateSpineFill();
 const paperEl    = document.getElementById('paper');
 const paperHint  = document.getElementById('paperHint');
 const pdfBlock   = document.getElementById('pdfBlock');
@@ -40015,10 +40045,34 @@ function pick(f){
   if (current === 'extract') showPageCount(f);
 }
 // 提取模式：读取并显示 PDF 总页数
+const PDF_HEAD = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]); // %PDF-
+
+async function readPdfBytes(file){ return new Uint8Array(await file.arrayBuffer()); }
+
+function findPdfHeader(bytes){
+  if (bytes.length < 5) return -1;
+  if (bytes[0] === PDF_HEAD[0] && bytes[1] === PDF_HEAD[1] && bytes[2] === PDF_HEAD[2] && bytes[3] === PDF_HEAD[3] && bytes[4] === PDF_HEAD[4]) return 0;
+  const lim = Math.min(bytes.length - 5, 8192);
+  for (let i = 1; i <= lim; i++){
+    if (bytes[i] === PDF_HEAD[0] && bytes[i+1] === PDF_HEAD[1] && bytes[i+2] === PDF_HEAD[2] && bytes[i+3] === PDF_HEAD[3] && bytes[i+4] === PDF_HEAD[4]) return i;
+  }
+  return -1;
+}
+
+async function loadPdfBytes(bytes){
+  const idx = findPdfHeader(bytes);
+  if (idx === -1){
+    throw new Error('无法识别为有效的 PDF 文件（文件头缺失）。可能是文件未从 iCloud / 微信完整下载、已损坏，或被重命名。请重新保存或传输后再试。');
+  }
+  const data = idx === 0 ? bytes : bytes.slice(idx);
+  return await PDFDocument.load(data, { ignoreEncryption: true });
+}
+
+async function loadPdf(file){ return await loadPdfBytes(await readPdfBytes(file)); }
+
 async function showPageCount(f){
   try {
-    const b = new Uint8Array(await f.arrayBuffer());
-    const s = await PDFDocument.load(b);
+    const s = await loadPdf(f);
     filePages = s.getPageCount();
     pageCountEl.textContent = '共 ' + filePages + ' 页';
     pageNumEl.max = filePages;
@@ -40074,6 +40128,30 @@ function hexToRgb(hex){
   const n = parseInt(hex, 16) || 0;
   return { r: ((n>>16)&255)/255, g: ((n>>8)&255)/255, b: (n&255)/255 };
 }
+// 两个颜色的平均（用于渐变书脊上文字反色的亮度判断）
+function avgHex(a, b){
+  const x = hexToRgb(a), y = hexToRgb(b);
+  const to = v => ('0' + Math.round(v*255).toString(16)).slice(-2);
+  return '#' + to((x.r+y.r)/2) + to((x.g+y.g)/2) + to((x.b+y.b)/2);
+}
+// 书脊填充：纯色直接画矩形；渐变用多条横向细条模拟（顶=from，底=to）
+function fillSpine(page, x, y, w, h, fill){
+  if (fill.type === 'gradient'){
+    const a = hexToRgb(fill.from), b = hexToRgb(fill.to);
+    const steps = 80, sh = h / steps;
+    for (let k = 0; k < steps; k++){
+      const t = k / (steps - 1);
+      page.drawRectangle({
+        x, y: y + h - (k + 1) * sh,
+        width: w, height: sh + 0.6,
+        color: rgb(a.r + (b.r-a.r)*t, a.g + (b.g-a.g)*t, a.b + (b.b-a.b)*t)
+      });
+    }
+  } else {
+    const c = hexToRgb(fill.color);
+    page.drawRectangle({ x, y, width: w, height: h, color: rgb(c.r, c.g, c.b) });
+  }
+}
 
 // 兼容 pdf-lib：某些 PDF（扫描件/特殊生成器）的页面缺少 /Contents，
 // embedPage 会直接抛 "Can't embed page with missing Contents"。
@@ -40091,7 +40169,7 @@ async function embedCoverFace(out, file){
   const t = (file.type || '').toLowerCase();
   const name = file.name.toLowerCase();
   if (t.includes('pdf') || name.endsWith('.pdf')){
-    const src = await PDFDocument.load(bytes);
+    const src = await loadPdfBytes(bytes);
     return { kind:'page', obj: await safeEmbedPage(out, src, src.getPage(0)) };
   }
   if (t.includes('png') || name.endsWith('.png')) return { kind:'img', obj: await out.embedPng(bytes) };
@@ -40166,10 +40244,11 @@ async function coverGenerate(){
     const page = out.addPage([pageW, pageH]);
     drawFace(page, await embedCoverFace(out, backFile), ox + 0, oy, Wp, Hp);
     drawFace(page, await embedCoverFace(out, coverFile), ox + Wp + spineP, oy, Wp, Hp);
-    // 书脊：填充用户选的颜色 +（可选）横排书名（封面侧在上、封底侧在下，从上往下读）
-    const spineColor = (spineColEl && spineColEl.value) || '#333333';
-    const cr = hexToRgb(spineColor);
-    page.drawRectangle({ x: ox + Wp, y: oy, width: spineP, height: Hp, color: rgb(cr.r, cr.g, cr.b) });
+    // 书脊：填充用户选的颜色（纯色或渐变）+（可选）横排书名（封面侧在上、封底侧在下，从上往下读）
+    fillSpine(page, ox + Wp, oy, spineP, Hp, spineFill);
+    const spineLumColor = spineFill.type === 'gradient'
+      ? avgHex(spineFill.from, spineFill.to) : spineFill.color;
+    const cr = hexToRgb(spineLumColor);
     const raw = (spineTxtEl.value || '');
     const stRender = raw.replace(/\s+$/, '');                  // 保留句首空格(用于下移书名)，仅去句尾空格
     if (stRender.trim() && spineP > 1){
@@ -40194,6 +40273,35 @@ async function coverGenerate(){
       const pngBytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
       const img = await out.embedPng(pngBytes);
       page.drawImage(img, { x: ox + Wp, y: oy, width: spineP, height: Hp });
+    }
+    // 序列号：书脊底部、正放（不旋转），留空不印；字体自适应书脊宽度。
+    // 句首空格可把序列号往上提（每个空格约上移 4mm）；默认距底 12mm。
+    const snRaw = spineSnEl.value || '';
+    const snLead = (snRaw.match(/^ */) || [''])[0].length;     // 句首空格数
+    const sn = snRaw.replace(/^\s+/, '').trim();               // 去掉句首空格后用于绘制
+    if (sn && spineP > 1){
+      const snLum = hexToRgb(spineLumColor);
+      const snTxt = ((snLum.r*299 + snLum.g*587 + snLum.b*114)/1000) > 0.6 ? '#000000' : '#ffffff';
+      const S = 2;
+      const cw = Math.max(1, Math.round(spineP * S));
+      const ch = Math.max(1, Math.round(Hp * S));
+      const c2 = document.createElement('canvas');
+      c2.width = cw; c2.height = ch;
+      const x2 = c2.getContext('2d');
+      let f = Math.min(spineP * 0.82, (Hp / MM) * 0.9) * S;
+      x2.font = f + 'px sans-serif';
+      const maxW = cw - 4 * S;                       // 左右各留 2mm
+      const w0 = x2.measureText(sn).width;
+      if (w0 > maxW){ f *= maxW / w0; x2.font = f + 'px sans-serif'; }
+      x2.fillStyle = snTxt;
+      x2.textAlign = 'center';
+      x2.textBaseline = 'bottom';
+      const upMM = 12 + snLead * 4;                  // 默认距底 12mm，每句首空格上移 4mm
+      x2.fillText(sn, cw / 2, ch - upMM * MM * S);
+      const b64b = c2.toDataURL('image/png').split(',')[1];
+      const pngB = Uint8Array.from(atob(b64b), c => c.charCodeAt(0));
+      const imgB = await out.embedPng(pngB);
+      page.drawImage(imgB, { x: ox + Wp, y: oy, width: spineP, height: Hp });
     }
     const outBytes = await out.save();
     doDownload(new Blob([outBytes], { type:'application/pdf' }), 'cover.pdf');
@@ -40272,8 +40380,7 @@ async function extractGenerate(){
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
   try {
-    const bytes = new Uint8Array(await fileObj.arrayBuffer());
-    const src = await PDFDocument.load(bytes);
+    const src = await loadPdf(fileObj);
     const N = src.getPageCount();
     if (currentExtract === 'page'){
       const p = parseInt(pageNumEl.value, 10);
@@ -40332,8 +40439,7 @@ btnEl.onclick = async () => {
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
   try {
-    const bytes = new Uint8Array(await fileObj.arrayBuffer());
-    const src = await PDFDocument.load(bytes);
+    const src = await loadPdf(fileObj);
     const N = src.getPageCount();
     const total = Math.ceil(N / 4) * 4;            // 向上取到 4 的倍数（多出的位置留空）
     const out = await PDFDocument.create();
