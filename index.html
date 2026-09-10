@@ -40160,7 +40160,10 @@ async function safeEmbedPage(out, srcDoc, srcPage){
   if (!srcPage.node.Contents()){
     srcPage.node.set(PDFName.of('Contents'), srcDoc.context.stream(''));
   }
-  return await out.embedPage(srcPage);
+  // 默认按 CropBox 嵌入：裁剪到 PDF 作者定义的可见区域；没有 CropBox 的会自动回退到 MediaBox。
+  const cb = srcPage.getCropBox();
+  const bbox = { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
+  return await out.embedPage(srcPage, bbox);
 }
 
 // 嵌入封面/封底（图片或 PDF 首页）
@@ -40394,9 +40397,10 @@ async function extractGenerate(){
       }
       const out = await PDFDocument.create();
       const pg = src.getPage(p - 1);
+      const cb = pg.getCropBox();
       const emb = await safeEmbedPage(out, src, pg);
-      const np = out.addPage([pg.getWidth(), pg.getHeight()]);
-      np.drawPage(emb, { x:0, y:0, width: pg.getWidth(), height: pg.getHeight() });
+      const np = out.addPage([cb.width, cb.height]);
+      np.drawPage(emb, { x:0, y:0, width: cb.width, height: cb.height });
       doDownload(new Blob([await out.save()], { type:'application/pdf' }), 'page_' + p + '_' + fileObj.name);
       msgEl.textContent = '✅ 已提取第 ' + p + ' 页（共 ' + N + ' 页），开始下载。';
     } else {
@@ -40407,16 +40411,18 @@ async function extractGenerate(){
       }
       const out1 = await PDFDocument.create();
       const pg1 = src.getPage(0);
+      const cb1 = pg1.getCropBox();
       const emb1 = await safeEmbedPage(out1, src, pg1);
-      const n1 = out1.addPage([pg1.getWidth(), pg1.getHeight()]);
-      n1.drawPage(emb1, { x:0, y:0, width: pg1.getWidth(), height: pg1.getHeight() });
+      const n1 = out1.addPage([cb1.width, cb1.height]);
+      n1.drawPage(emb1, { x:0, y:0, width: cb1.width, height: cb1.height });
       doDownload(new Blob([await out1.save()], { type:'application/pdf' }), 'first_' + fileObj.name, true);
 
       const out2 = await PDFDocument.create();
       const pgL = src.getPage(N - 1);
+      const cbL = pgL.getCropBox();
       const emb2 = await safeEmbedPage(out2, src, pgL);
-      const n2 = out2.addPage([pgL.getWidth(), pgL.getHeight()]);
-      n2.drawPage(emb2, { x:0, y:0, width: pgL.getWidth(), height: pgL.getHeight() });
+      const n2 = out2.addPage([cbL.width, cbL.height]);
+      n2.drawPage(emb2, { x:0, y:0, width: cbL.width, height: cbL.height });
       doDownload(new Blob([await out2.save()], { type:'application/pdf' }), 'last_' + fileObj.name, false);
       msgEl.textContent = '✅ 已提取收尾 2 页（第 1 页 与 第 ' + N + ' 页），开始下载 2 个文件：\n· first_' + fileObj.name + '（首页）\n· last_' + fileObj.name + '（末页）';
     }
@@ -40443,8 +40449,9 @@ btnEl.onclick = async () => {
     const N = src.getPageCount();
     const total = Math.ceil(N / 4) * 4;            // 向上取到 4 的倍数（多出的位置留空）
     const out = await PDFDocument.create();
-    const W = src.getPage(0).getWidth();
-    const H = src.getPage(0).getHeight();
+    const firstCb = src.getPage(0).getCropBox();
+    const W = firstCb.width;
+    const H = firstCb.height;
 
     // 逐页独立嵌入，避免 pdf-lib 一次 embedPdf 后多处 drawPage 丢失内容
     const emb = [];
