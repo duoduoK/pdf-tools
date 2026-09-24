@@ -39886,13 +39886,13 @@
 
       <!-- 删减 -->
       <div id="editpdfDel" hidden style="margin-top:14px">
-        <p class="label">删减页码（基于原文件页码，多个用英文逗号分隔）</p>
+        <p class="label">删减页码（基于原文件页码，多个用逗号分隔（英文逗号或中文逗号「，」均可））</p>
         <input type="text" id="editpdfDelPages" class="num" placeholder="例如 2,5,8">
       </div>
 
       <!-- 替换 -->
       <div id="editpdfRep" hidden style="margin-top:14px">
-        <p class="label">替换页码（基于原文件页码，多个用英文逗号分隔）</p>
+        <p class="label">替换页码（基于原文件页码，多个用逗号分隔（英文逗号或中文逗号「，」均可））</p>
         <input type="text" id="editpdfRepPages" class="num" placeholder="例如 4,7">
         <div class="fname" style="margin-top:8px">上传替换页（仅支持<b>单页</b> PDF，将替换上方列出的每一页）</div>
         <div class="drop small-drop" id="dropRep" style="margin-top:6px">
@@ -40775,8 +40775,8 @@ async function editpdfGenerate(){
     const delSet = new Set();
     if (editpdfOps.has('del')){
       const raw = editpdfDelPages.value.trim();
-      if (!raw){ msgEl.textContent = '⚠️ 已选「删减」，请填写要删减的页码（多个用英文逗号分隔）。'; btnEl.disabled=false; return; }
-      for (const tok of raw.split(',')){
+      if (!raw){ msgEl.textContent = '⚠️ 已选「删减」，请填写要删减的页码（多个用逗号分隔（英文逗号或中文逗号「，」均可））。'; btnEl.disabled=false; return; }
+      for (const tok of raw.split(/[,，]/)){
         const p = parseInt(tok.trim(), 10);
         if (!Number.isInteger(p) || p < 1 || p > N){ msgEl.textContent = '⚠️ 删减页码无效：「' + tok + '」应为 1 ~ ' + N + ' 的正整数。'; btnEl.disabled=false; return; }
         delSet.add(p);
@@ -40788,14 +40788,14 @@ async function editpdfGenerate(){
     const repTargets = [];
     if (editpdfOps.has('rep')){
       const raw = editpdfRepPages.value.trim();
-      if (!raw){ msgEl.textContent = '⚠️ 已选「替换」，请填写要替换的页码（多个用英文逗号分隔）。'; btnEl.disabled=false; return; }
+      if (!raw){ msgEl.textContent = '⚠️ 已选「替换」，请填写要替换的页码（多个用逗号分隔（英文逗号或中文逗号「，」均可））。'; btnEl.disabled=false; return; }
       if (!editpdfRepFileObj){ msgEl.textContent = '⚠️ 已选「替换」，请上传替换用的单页 PDF。'; btnEl.disabled=false; return; }
       const repSrc = await loadPdf(editpdfRepFileObj);
       if (repSrc.getPageCount() !== 1){ msgEl.textContent = '⚠️ 替换用的 PDF 必须是单页，当前为 ' + repSrc.getPageCount() + ' 页。'; btnEl.disabled=false; return; }
       const repPg = repSrc.getPage(0);
       const repCb = repPg.getCropBox();
       repItem = makeItem(await safeEmbedPage(out, repSrc, repPg), repCb.width, repCb.height, refW, refH);
-      for (const tok of raw.split(',')){
+      for (const tok of raw.split(/[,，]/)){
         const p = parseInt(tok.trim(), 10);
         if (!Number.isInteger(p) || p < 1 || p > N){ msgEl.textContent = '⚠️ 替换页码无效：「' + tok + '」应为 1 ~ ' + N + ' 的正整数。'; btnEl.disabled=false; return; }
         if (delSet.has(p)){ msgEl.textContent = '⚠️ 第 ' + p + ' 页同时被设为删减与替换，请去掉其一（以删减为准）。'; btnEl.disabled=false; return; }
