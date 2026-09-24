@@ -39801,11 +39801,11 @@
         <div class="t">A4 切 B5</div>
         <div class="d">把 PDF 内容按 B5 尺寸放进 A4：可「居中裁四边」，或「顶格左右交替、双面只裁右边+下边两刀」。</div>
       </div>
-      <div class="mode" data-mode="convert" hidden>
+      <div class="mode" data-mode="editpdf">
         <span class="tick">✓</span>
-        <div class="ic">🔁</div>
-        <div class="t">书皮转换</div>
-        <div class="d">把别人做好的「一体书皮」按内页尺寸重排：换内页尺寸、可拆两张 A4 打印。</div>
+        <div class="ic">🧩</div>
+        <div class="t">增删PDF</div>
+        <div class="d">在原始 PDF 上批量增加、删减、替换页面，三种处理可一次同时完成。</div>
       </div>
     </div>
 
@@ -39853,6 +39853,58 @@
       <div id="a4tob5Note" style="margin-top:6px;font-size:12.5px;color:#9aa3b2">
         <b>居中</b>：内容居中放进 B5 白框，A4 打印后沿框裁四周白边得 B5。<br>
         <b>顶格左右交替</b>：B5 框顶格贴纸的<b>上边</b>，奇数页贴<b>左边</b>、偶数页贴<b>右边</b>（内容按原比例 1:1 放进 B5 框、不变形）。用打印机「<b>沿长边双面</b>」打印后，正反面在阅读视图里都落在同一左上位置，最终只需沿<b>右边 + 下边</b>裁两刀即得 B5，无需裁四边。
+      </div>
+    </div>
+
+    <!-- 增删 PDF -->
+    <div id="editpdfBlock" hidden>
+      <p class="label">③ 处理方式（可多选）</p>
+      <div class="seg" id="editpdfSeg">
+        <div class="opt" data-op="add">增加</div>
+        <div class="opt" data-op="del">删减</div>
+        <div class="opt" data-op="rep">替换</div>
+      </div>
+
+      <div class="fname" style="margin-top:8px;color:var(--sub);font-size:12px;line-height:1.5">
+        提示：插入 / 替换进去的 PDF 页面，会自动缩放为<b>原文件的页面尺寸</b>（以第 1 页为准，内容等比缩放居中、不变形）；原文件自身页面保持原尺寸。
+      </div>
+
+      <div id="editpdfCount" class="fname" style="margin-top:10px;color:var(--sub);font-weight:500"></div>
+
+      <!-- 增加 -->
+      <div id="editpdfAdd" hidden style="margin-top:14px">
+        <p class="label">插入位置（基于原文件页码，插入到该页之后；填 0 表示插到最前面）</p>
+        <input type="number" id="editpdfAddPos" class="num" min="0" step="1" placeholder="例如 3（插到第 3 页之后）">
+        <div class="fname" style="margin-top:8px">上传要插入的 PDF（可多页，按原顺序依次插入）</div>
+        <div class="drop small-drop" id="dropAdd" style="margin-top:6px">
+          <input type="file" id="editpdfAddFile" accept="application/pdf,.pdf" hidden>
+          <div class="big">点击选择插入的 PDF</div>
+          <div class="small">仅支持 PDF，本地处理</div>
+          <div class="fname" id="editpdfAddName"></div>
+        </div>
+      </div>
+
+      <!-- 删减 -->
+      <div id="editpdfDel" hidden style="margin-top:14px">
+        <p class="label">删减页码（基于原文件页码，多个用英文逗号分隔）</p>
+        <input type="text" id="editpdfDelPages" class="num" placeholder="例如 2,5,8">
+      </div>
+
+      <!-- 替换 -->
+      <div id="editpdfRep" hidden style="margin-top:14px">
+        <p class="label">替换页码（基于原文件页码，多个用英文逗号分隔）</p>
+        <input type="text" id="editpdfRepPages" class="num" placeholder="例如 4,7">
+        <div class="fname" style="margin-top:8px">上传替换页（仅支持<b>单页</b> PDF，将替换上方列出的每一页）</div>
+        <div class="drop small-drop" id="dropRep" style="margin-top:6px">
+          <input type="file" id="editpdfRepFile" accept="application/pdf,.pdf" hidden>
+          <div class="big">点击选择替换用的单页 PDF</div>
+          <div class="small">仅支持 PDF，本地处理</div>
+          <div class="fname" id="editpdfRepName"></div>
+        </div>
+      </div>
+
+      <div class="fname" style="margin-top:14px;color:var(--sub);font-weight:500;line-height:1.6">
+        所有页码均指<b>原始文件</b>的页码；一次可同时执行增加 / 删减 / 替换。若某页同时被设删减与替换，以删减为准。
       </div>
     </div>
 
@@ -39921,80 +39973,7 @@
       <span style="color:#9aa3b2">二选一：① 直接导出书皮本身（真实尺寸）；② 把书皮按真实尺寸居中嵌入所选纸张，打印机自动选纸、印出来尺寸不变。</span>
     </div>
 
-    <!-- 书皮转换 -->
-    <div id="convertBlock" hidden>
-      <p class="label">② 上传一体书皮（图片 或 PDF）</p>
-      <div class="drop" id="dropConvert">
-        <button type="button" class="clear-file" id="convertClear" title="清除">×</button>
-        <div class="big">点击选择，或拖拽到此处</div>
-        <div class="small">封面＋书脊＋封底 横排的一张图，或 PDF（封底在左）</div>
-        <input type="file" id="convertFile" accept="image/png,image/jpeg,image/jpg,application/pdf" hidden>
-        <div class="fname" id="convertName"></div>
-      </div>
-      <div style="margin-top:10px"><canvas id="convertPreview" style="width:100%;max-width:520px;border:1px solid var(--line);border-radius:10px;display:none;background:#fff"></canvas></div>
-      <div id="convertPreviewNote" style="margin-top:6px;font-size:12.5px;color:#9aa3b2;display:none">
-        上图按你填的「源内页尺寸」自动切分：左=<b>封底</b>、中=<b>书脊</b>、右=<b>封面</b>。若发现切反了，说明你的一体书皮是「封面在左」，请用图片工具水平翻转后再上传。
-      </div>
 
-      <p class="label" style="margin-top:14px">③ 源内页尺寸（PDF 会自动识别，也可手动改）</p>
-      <div class="row">
-        <select id="convertSrcSize" class="sel">
-          <option value="A3">A3（297 × 420 mm）</option>
-          <option value="A4">A4（210 × 297 mm）</option>
-          <option value="A5">A5（148 × 210 mm）</option>
-          <option value="B5">B5（182 × 257 mm）</option>
-        </select>
-        <div class="seg" id="convertSrcOrient">
-          <div class="opt on" data-orient="portrait">竖向</div>
-          <div class="opt" data-orient="landscape">横向</div>
-        </div>
-      </div>
-
-      <p class="label" style="margin-top:14px">④ 目标内页尺寸（想转成什么内页的书皮）</p>
-      <div class="row">
-        <select id="convertTgtSize" class="sel">
-          <option value="A3">A3（297 × 420 mm）</option>
-          <option value="A4">A4（210 × 297 mm）</option>
-          <option value="A5" selected>A5（148 × 210 mm）</option>
-          <option value="B5">B5（182 × 257 mm）</option>
-        </select>
-        <div class="seg" id="convertTgtOrient">
-          <div class="opt on" data-orient="portrait">竖向</div>
-          <div class="opt" data-orient="landscape">横向</div>
-        </div>
-      </div>
-
-      <p class="label" style="margin-top:14px">⑤ 书脊宽度（mm，自动按源图算出，可改）</p>
-      <input type="number" id="convertSpine" class="num" min="0" step="0.5" placeholder="选好源尺寸和上传图后自动填充">
-
-      <p class="label" style="margin-top:14px">⑥ 输出形式</p>
-      <div class="seg" id="convertOut">
-        <div class="opt on" data-out="one">一体书皮</div>
-        <div class="opt" data-out="split">拆成两张 A4</div>
-      </div>
-      <span style="color:#9aa3b2">一体＝一张 [封底+书脊+封面]；拆分＝封面+书脊 一张、封底 一张，两张 A4 即可打印（目标较大时最方便）。</span>
-
-      <p class="label" style="margin-top:14px">⑦ 导出方式（书皮始终按真实尺寸，不缩放）</p>
-      <select id="convertPaper" class="num" style="height:44px;cursor:pointer">
-        <option value="none">书皮实际尺寸（不嵌入纸张）</option>
-        <option value="a3">嵌入到 A3（297×420mm）</option>
-        <option value="a4">嵌入到 A4（210×297mm）</option>
-        <option value="a5">嵌入到 A5（148×210mm）</option>
-        <option value="b5">嵌入到 B5（182×257mm）</option>
-      </select>
-      <div id="convertPaperHint" style="margin-top:6px;font-size:13px;min-height:18px"></div>
-    </div>
-
-    <div class="how" id="convertHow" hidden>
-      <b>使用方法（书皮转换）：</b><br>
-      1. 上传一张「一体书皮」（封面＋书脊＋封底 横排，<b>封底在左</b>），支持 PNG / JPG / PDF；<br>
-      2. PDF 会按页面高度<b>自动识别源内页尺寸</b>（A3 / A4 / A5 / B5，含横竖），图片则需手动选「源内页尺寸」；<br>
-      3. 选「目标内页尺寸」——想转成哪种内页的书皮（如 A4 → A5）；<br>
-      4. 书脊宽度会自动按图/PDF 算好（可改），并将按你填的宽度重绘；<br>
-      5. 选输出形式：<b>一体书皮</b>（一张 [封底+书脊+封面]）或 <b>拆成两张</b>（封面+书脊 / 封底，两张 A4 即可打印）；<br>
-      6. 点“生成新 PDF”下载。A / B 系列纸同比例，封面图缩放不变形。<br>
-      <span style="color:#9aa3b2">说明：转换只缩放/重排已有内容，不重新排版文字；若你的一体书皮是「封面在左」，请先在图片工具里水平翻转再上传。</span>
-    </div>
 
 
     <button class="go" id="b" disabled>生成新 PDF</button>
@@ -40042,7 +40021,6 @@
   </div>
 </div>
 
-<script src="pdf.min.js"></script>
 <script>
 // 仅鸿蒙系统的微信/QQ 内置浏览器无法保存文件；安卓/苹果(含微信内)保持原样可下载
 var ua = navigator.userAgent.toLowerCase();
@@ -40073,15 +40051,11 @@ if (typeof PDFLib === 'undefined'){
 }
 
 const { PDFDocument, rgb, PDFName } = PDFLib;
-if (window.pdfjsLib){ try { if (location.protocol !== 'file:') window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js'; } catch(e){} }
 let current = 'fold';
 let fileObj = null;
 let sizeVal = 'A4';
 let orient = 'portrait';
 let coverFile = null, backFile = null;
-let convertFile = null, convertImg = null;   // 一体书皮图及其 Image 对象
-let convertSrcOrient = 'portrait', convertTgtOrient = 'portrait';
-let convertOut = 'one';
 
 const modesEl = document.getElementById('modes');
 const dropEl  = document.getElementById('drop');
@@ -40109,24 +40083,6 @@ const spineToEl   = document.getElementById('spineTo');
 const spineToWrap = document.getElementById('spineToWrap');
 const spineGradChk= document.getElementById('spineGrad');
 
-// 书皮转换模式
-const convertBlock   = document.getElementById('convertBlock');
-const convertHow     = document.getElementById('convertHow');
-const dropConvert    = document.getElementById('dropConvert');
-const convertFEl     = document.getElementById('convertFile');
-const convertNEl     = document.getElementById('convertName');
-const convertClearEl = document.getElementById('convertClear');
-const convertPreview = document.getElementById('convertPreview');
-const convertPrevNote= document.getElementById('convertPreviewNote');
-const convertSrcSize = document.getElementById('convertSrcSize');
-const convertSrcOrientSeg = document.getElementById('convertSrcOrient');
-const convertTgtSize = document.getElementById('convertTgtSize');
-const convertTgtOrientSeg = document.getElementById('convertTgtOrient');
-const convertSpineEl  = document.getElementById('convertSpine');
-const convertOutSeg   = document.getElementById('convertOut');
-const convertPaperEl  = document.getElementById('convertPaper');
-const convertPaperHint= document.getElementById('convertPaperHint');
-const SIZES = { A3:[297,420], A4:[210,297], A5:[148,210], B5:[182,257] };
 let spineFill = { type:'solid', color: spineFromEl.value };
 function updateSpineFill(){
   spineFill = spineGradChk.checked
@@ -40157,6 +40113,25 @@ const a4tob5Block  = document.getElementById('a4tob5Block');
 const a4tob5How    = document.getElementById('a4tob5How');
 const a4tob5Seg    = document.getElementById('a4tob5Seg');
 const a4tob5PlaceEl = document.getElementById('a4tob5Place');
+// 增删 PDF
+const editpdfBlock    = document.getElementById('editpdfBlock');
+const editpdfSeg      = document.getElementById('editpdfSeg');
+const editpdfCountEl  = document.getElementById('editpdfCount');
+const editpdfAddEl    = document.getElementById('editpdfAdd');
+const editpdfDelEl    = document.getElementById('editpdfDel');
+const editpdfRepEl    = document.getElementById('editpdfRep');
+const editpdfAddPos   = document.getElementById('editpdfAddPos');
+const editpdfAddFile  = document.getElementById('editpdfAddFile');
+const editpdfAddName  = document.getElementById('editpdfAddName');
+const dropAddEl       = document.getElementById('dropAdd');
+const editpdfDelPages = document.getElementById('editpdfDelPages');
+const editpdfRepPages = document.getElementById('editpdfRepPages');
+const editpdfRepFile  = document.getElementById('editpdfRepFile');
+const editpdfRepName  = document.getElementById('editpdfRepName');
+const dropRepEl       = document.getElementById('dropRep');
+const editpdfOps = new Set();
+let editpdfAddFileObj = null;
+let editpdfRepFileObj = null;
 let currentExtract = 'page';
 let a4tob5Size = 'small';
 let a4tob5PlaceMode = 'edge';
@@ -40175,26 +40150,23 @@ modesEl.querySelectorAll('.mode').forEach(el => {
 function showMode(mode){
   const isCover = (mode === 'cover');
   const isExtract = (mode === 'extract');
-  const isConvert = (mode === 'convert');
   const isA4tob5 = (mode === 'a4tob5');
-  pdfBlock.hidden    = (isCover || isConvert);          // 封面 / 转换模式不需要上传“原书”PDF
+  const isEditpdf = (mode === 'editpdf');
+  pdfBlock.hidden    = isCover;
   coverBlock.hidden  = !isCover;
-  convertBlock.hidden = !isConvert;
   a4tob5Block.hidden  = !isA4tob5;
   extractBlock.hidden = !isExtract;
+  editpdfBlock.hidden = !isEditpdf;
   pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4');
   coverHow.hidden    = !isCover;
   extractHow.hidden  = !isExtract;
-  convertHow.hidden  = !isConvert;
   a4tob5How.hidden   = !isA4tob5;
   if (isExtract && fileObj) showPageCount(fileObj);
   if (isCover){ syncCoverPaper(); checkPaper(); }
-  if (isConvert) convertCheck();
   refreshBtn();
 }
 function refreshBtn(){
   if (current === 'cover') btnEl.disabled = !(coverFile || backFile);
-  else if (current === 'convert') btnEl.disabled = !convertFile;
   else btnEl.disabled = !fileObj;
 }
 
@@ -40215,6 +40187,9 @@ function pick(f){
   btnEl.disabled = false;
   msgEl.textContent = '';
   if (current === 'extract') showPageCount(f);
+  if (current === 'editpdf'){
+    loadPdf(f).then(s => { editpdfCountEl.textContent = '当前原文件共 ' + s.getPageCount() + ' 页（下方所有页码请按此范围填写）'; }).catch(()=>{});
+  }
 }
 // 提取模式：读取并显示 PDF 总页数
 const PDF_HEAD = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]); // %PDF-
@@ -40287,6 +40262,26 @@ a4tob5PlaceEl.querySelectorAll('.opt').forEach(o => {
     a4tob5PlaceMode = o.dataset.place;
   };
 });
+// 增删 PDF：处理方式多选 + 动态显隐对应输入区 + 上传区
+editpdfSeg.querySelectorAll('.opt').forEach(o => {
+  o.onclick = () => {
+    if (o.classList.contains('on')){ o.classList.remove('on'); editpdfOps.delete(o.dataset.op); }
+    else { o.classList.add('on'); editpdfOps.add(o.dataset.op); }
+    editpdfAddEl.hidden = !editpdfOps.has('add');
+    editpdfDelEl.hidden = !editpdfOps.has('del');
+    editpdfRepEl.hidden = !editpdfOps.has('rep');
+  };
+});
+function bindEditPdfDrop(drop, input, nameEl, setObj){
+  drop.onclick = () => input.click();
+  input.onchange = () => { const f = input.files[0]; if (f){ setObj(f); nameEl.textContent = '已选择：' + f.name; } };
+  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('hot'); }));
+  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('hot'); }));
+  drop.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f){ setObj(f); nameEl.textContent = '已选择：' + f.name; } });
+}
+bindEditPdfDrop(dropAddEl, editpdfAddFile, editpdfAddName, f => editpdfAddFileObj = f);
+bindEditPdfDrop(dropRepEl, editpdfRepFile, editpdfRepName, f => editpdfRepFileObj = f);
+
 // 书皮输出是“自动”的：封面+封底都传 → 拆两张（按 A4 打印，默认纸张切到 A4）；
 // 只传一个 → 单张（默认“实际尺寸”）。这里只在两个都传且还是“实际尺寸”时帮用户选好 A4。
 function syncCoverPaper(){
@@ -40326,280 +40321,6 @@ backClearEl.onclick  = (e) => { e.stopPropagation(); clearCover('back'); };
     if (f){ el.files = f; pickCover(which, f); }
   });
 });
-
-// ===== 书皮转换模式 =====
-function convFaceDims(sizeVal, orient){
-  const [a, b] = SIZES[sizeVal];
-  return orient === 'portrait' ? { w:a, h:b } : { w:b, h:a };
-}
-// 把一体书皮图的某一段裁成 PNG（按源像素 1:1，保证清晰度）
-function cropRegion(img, sx, sy, sw, sh){
-  const c = document.createElement('canvas');
-  c.width  = Math.max(1, Math.round(sw));
-  c.height = Math.max(1, Math.round(sh));
-  const ctx = c.getContext('2d');
-  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, c.width, c.height);
-  const b64 = c.toDataURL('image/png').split(',')[1];
-  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-}
-// 按源内页尺寸，从图高反推 mm/px，算出封面/书脊/封底的像素区间与书脊 mm
-function convertComputeSpine(){
-  if (!convertImg) return null;
-  const face = convFaceDims(convertSrcSize.value, convertSrcOrient);
-  const iw = convertImg.naturalWidth, ih = convertImg.naturalHeight;
-  const scale = face.h / ih;                 // mm / px（书皮高度 = 内页高度）
-  const totalWmm = iw * scale;
-  const spineMm = totalWmm - 2 * face.w;
-  return { faceW:face.w, faceH:face.h, scale, spineMm, iw, ih };
-}
-function drawConvertPreview(){
-  const g = convertComputeSpine();
-  if (!g) return;
-  const c = convertPreview;
-  c.width = g.iw; c.height = g.ih;
-  const ctx = c.getContext('2d');
-  ctx.drawImage(convertImg, 0, 0);
-  const faceWpx = g.faceW / g.scale, spinePx = g.spineMm / g.scale;
-  const x1 = faceWpx, x2 = faceWpx + spinePx;
-  ctx.strokeStyle = 'rgba(214,48,49,.9)';
-  ctx.lineWidth = Math.max(2, c.width / 320);
-  ctx.beginPath(); ctx.moveTo(x1, 0); ctx.lineTo(x1, c.height); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(x2, 0); ctx.lineTo(x2, c.height); ctx.stroke();
-  ctx.fillStyle = 'rgba(214,48,49,.95)';
-  ctx.font = Math.max(14, c.height / 16) + 'px sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  ctx.fillText('封底', faceWpx / 2, 6);
-  ctx.fillText('书脊', faceWpx + spinePx / 2, 6);
-  ctx.fillText('封面', faceWpx + spinePx + faceWpx / 2, 6);
-  c.style.display = 'block';
-  convertPrevNote.style.display = 'block';
-}
-function autoFillSpine(){
-  const g = convertComputeSpine();
-  if (!g) return;
-  if (convertSpineEl.dataset.auto !== '0'){
-    convertSpineEl.value = (g.spineMm > 0 ? g.spineMm.toFixed(1) : '');
-    convertSpineEl.dataset.auto = '1';
-  }
-}
-function convertCheck(){
-  const g = convertImg ? convertComputeSpine() : null;
-  // 纸张提示（按目标尺寸算最宽那张）
-  if (convertPaperHint){
-    const tgt = convFaceDims(convertTgtSize.value, convertTgtOrient);
-    const spineMm = parseFloat(convertSpineEl.value) || 0;
-    const paperVal = convertPaperEl.value;
-    if (paperVal === 'none'){ convertPaperHint.textContent = ''; }
-    else {
-      const PAPERS = { a3:[297,420], a4:[210,297], a5:[148,210], b5:[182,257] };
-      const maxW = (convertOut === 'split') ? Math.max(tgt.w + spineMm, tgt.w) : (2 * tgt.w + spineMm);
-      const [pw, ph] = PAPERS[paperVal];
-      const fits = (maxW <= pw && tgt.h <= ph) || (maxW <= ph && tgt.h <= pw);
-      convertPaperHint.innerHTML = fits ? ''
-        : '<span style="color:#ff5c5c">⚠️ 书皮约 ' + maxW.toFixed(0) + '×' + tgt.h.toFixed(0) + ' mm，比 ' + paperVal.toUpperCase() + ' 大，将自动按原尺寸导出（不嵌入纸张）。</span>';
-    }
-  }
-  if (g){
-    if (g.spineMm < 0){
-      convertPaperHint.innerHTML = '<span style="color:#ff5c5c">⚠️ 按当前源尺寸算出的书脊为负，说明源内页尺寸填错，或这张图不是标准一体书皮。请检查源尺寸。</span>';
-    }
-    autoFillSpine();
-    drawConvertPreview();
-  } else {
-    convertPreview.style.display = 'none';
-    convertPrevNote.style.display = 'none';
-  }
-}
-// 凭 PDF 页面高度自动识别源内页尺寸（A3/A4/A5/B5，含横竖）
-function detectSrcSize(hMm, wMm){
-  const cands = [
-    { size:'A3', orient:'portrait',  w:297, h:420 },
-    { size:'A3', orient:'landscape', w:420, h:297 },
-    { size:'A4', orient:'portrait',  w:210, h:297 },
-    { size:'A4', orient:'landscape', w:297, h:210 },
-    { size:'A5', orient:'portrait',  w:148, h:210 },
-    { size:'A5', orient:'landscape', w:210, h:148 },
-    { size:'B5', orient:'portrait',  w:182, h:257 },
-    { size:'B5', orient:'landscape', w:257, h:182 }
-  ];
-  let best = null, bestScore = 1e9;
-  for (const c of cands){
-    const dh = Math.abs(c.h - hMm);
-    if (dh > 5) continue;                          // 高度差 >5mm 视为不匹配
-    const spine = wMm - 2 * c.w;                   // 反推书脊宽
-    const score = dh + (spine < -1 ? 500 : 0) + Math.max(0, spine - c.w) * 2;
-    if (score < bestScore){ bestScore = score; best = c; }
-  }
-  if (best) best.srcSpineW = Math.max(0, wMm - 2 * best.w);
-  return best;
-}
-function setOrientSeg(seg, orient){
-  seg.querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x.dataset.orient === orient));
-}
-async function pickConvert(f){
-  if (!f) return;
-  const t = (f.type || '').toLowerCase(), name = f.name.toLowerCase();
-  const isPdf = t.includes('pdf') || name.endsWith('.pdf');
-  if (isPdf){
-    if (!window.pdfjsLib){
-      msgEl.textContent = 'PDF 转换需要 pdf.min.js（已随离线包放在同一目录）。若单独打开本文件，请把它与 pdf.min.js、pdf.worker.min.js 放在同一文件夹。';
-      return;
-    }
-    msgEl.textContent = '正在解析 PDF…';
-    try {
-      const buf = await f.arrayBuffer();
-      const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
-      const page = await pdf.getPage(1);
-      const vp1 = page.getViewport({ scale: 1 });
-      const hMm = vp1.height * 25.4 / 72, wMm = vp1.width * 25.4 / 72;
-      const det = detectSrcSize(hMm, wMm);
-      let scale = 200 / 72;
-      if (Math.max(vp1.width, vp1.height) * scale > 4500) scale = 4500 / Math.max(vp1.width, vp1.height);
-      const vp = page.getViewport({ scale });
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.max(1, Math.ceil(vp.width)); canvas.height = Math.max(1, Math.ceil(vp.height));
-      const cx = canvas.getContext('2d');
-      cx.fillStyle = '#fff'; cx.fillRect(0, 0, canvas.width, canvas.height);
-      await page.render({ canvasContext: cx, viewport: vp }).promise;
-      await pdf.destroy();
-      convertFile = f;
-      dropConvert.classList.add('has-file');
-      convertNEl.textContent = '已选择：' + f.name + (det ? '（识别源内页：' + det.size + (det.orient === 'landscape' ? ' 横向' : ' 竖向') + '）' : '（未能识别，请手动选源内页尺寸）');
-      if (det){
-        convertSrcSize.value = det.size;
-        setOrientSeg(convertSrcOrientSeg, det.orient);
-        convertSrcOrient = det.orient;
-      }
-      const img = new Image();
-      img.onload  = () => { convertImg = img; convertSpineEl.dataset.auto = '1'; convertCheck(); msgEl.textContent = ''; };
-      img.onerror = () => { msgEl.textContent = 'PDF 渲染成图失败。'; };
-      img.src = canvas.toDataURL('image/png');
-      refreshBtn();
-    } catch (e){ msgEl.textContent = 'PDF 解析失败：' + (e && e.message ? e.message : e); }
-    return;
-  }
-  // 图片（原逻辑）
-  convertFile = f; convertNEl.textContent = '已选择：' + f.name; dropConvert.classList.add('has-file');
-  const url = URL.createObjectURL(f);
-  const img = new Image();
-  img.onload  = () => { convertImg = img; convertSpineEl.dataset.auto = '1'; convertCheck(); URL.revokeObjectURL(url); };
-  img.onerror = () => { msgEl.textContent = '图片加载失败，请换一张 PNG / JPG。'; URL.revokeObjectURL(url); };
-  img.src = url;
-  refreshBtn();
-}
-function clearConvert(){
-  convertFile = null; convertImg = null; convertFEl.value = ''; convertNEl.textContent = '';
-  dropConvert.classList.remove('has-file');
-  convertSpineEl.value = ''; convertSpineEl.dataset.auto = '1';
-  convertPreview.style.display = 'none'; convertPrevNote.style.display = 'none';
-  refreshBtn(); convertCheck();
-}
-function buildConvSheet(out, panels, paperVal, PAPERS, MM){
-  let sheetW = 0, sheetH = 0;
-  panels.forEach(p => { sheetW += p.wMm; sheetH = Math.max(sheetH, p.hMm); });
-  let pageW = sheetW, pageH = sheetH, ox = 0, oy = 0, tooBig = false, orientName = '';
-  if (paperVal !== 'none' && PAPERS[paperVal]){
-    const [pw0, ph0] = PAPERS[paperVal];
-    let pw = pw0, ph = ph0;
-    if (!(sheetW <= pw && sheetH <= ph)){ if (sheetW <= ph && sheetH <= pw){ pw = ph0; ph = pw0; } else { pw = sheetW; ph = sheetH; tooBig = true; } }
-    if (!tooBig) orientName = (pw > ph ? paperVal.toUpperCase() + ' 横向' : paperVal.toUpperCase() + ' 竖向');
-    pageW = pw; pageH = ph; ox = (pageW - sheetW) / 2; oy = (pageH - sheetH) / 2;
-  }
-  const page = out.addPage([pageW * MM, pageH * MM]);
-  let x = ox * MM;
-  panels.forEach(p => {
-    page.drawImage(p.emb, { x, y: (oy + (sheetH - p.hMm)) * MM, width: p.wMm * MM, height: p.hMm * MM });
-    x += p.wMm * MM;
-  });
-  return { orientName, tooBig };
-}
-async function convertGenerate(){
-  if (!convertFile || !convertImg){ msgEl.textContent = '请先上传一体书皮图片'; return; }
-  if (isHarmonyOS && (inWeChat || inQQ)){
-    msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
-    return;
-  }
-  const g = convertComputeSpine();
-  if (!g || g.spineMm < 0){ msgEl.textContent = '源内页尺寸与图片不符（书脊算出来为负）。请确认源尺寸填对，或这张图是标准一体书皮。'; return; }
-  const spineMm = parseFloat(convertSpineEl.value) || 0;
-  if (spineMm <= 0){ msgEl.textContent = '书脊宽度需大于 0，请检查源尺寸或手动填写书脊宽度。'; return; }
-  btnEl.disabled = true; msgEl.textContent = '处理中…（图越大越慢，请稍候）';
-  try {
-    const MM = 2.834645669;
-    const tgt = convFaceDims(convertTgtSize.value, convertTgtOrient);
-    const scale = g.scale;
-    const faceWpx = g.faceW / scale, spinePx = g.spineMm / scale, ih = g.ih;
-    const backPng  = cropRegion(convertImg, 0, 0, faceWpx, ih);
-    const spinePng = cropRegion(convertImg, faceWpx, 0, spinePx, ih);
-    const frontPng = cropRegion(convertImg, faceWpx + spinePx, 0, faceWpx, ih);
-    const PAPERS = { a3:[297,420], a4:[210,297], a5:[148,210], b5:[182,257] };
-    const paperVal = convertPaperEl.value;
-    const produced = [];
-    if (convertOut === 'one'){
-      const out = await PDFDocument.create();
-      const backEmb  = await out.embedPng(backPng);
-      const spineEmb = await out.embedPng(spinePng);
-      const frontEmb = await out.embedPng(frontPng);
-      const sheetW = 2 * tgt.w + spineMm;
-      const r = buildConvSheet(out, [
-        { emb: backEmb,  wMm: tgt.w,    hMm: tgt.h },
-        { emb: spineEmb, wMm: spineMm,  hMm: tgt.h },
-        { emb: frontEmb, wMm: tgt.w,    hMm: tgt.h }
-      ], paperVal, PAPERS, MM);
-      const bytes = await out.save();
-      doDownload(new Blob([bytes], { type:'application/pdf' }), 'cover_converted.pdf');
-      produced.push({ label:'一体书皮', wmm: sheetW, hmm: tgt.h, orient: r.orientName });
-    } else {
-      // 拆两张：封面+书脊 一张、封底 一张（各自文档分别嵌入）
-      const out1 = await PDFDocument.create();
-      const spineEmb = await out1.embedPng(spinePng);
-      const frontEmb = await out1.embedPng(frontPng);
-      const sheet1W = tgt.w + spineMm;
-      const r1 = buildConvSheet(out1, [
-        { emb: spineEmb, wMm: spineMm, hMm: tgt.h },
-        { emb: frontEmb, wMm: tgt.w,    hMm: tgt.h }
-      ], paperVal, PAPERS, MM);
-      doDownload(new Blob([await out1.save()], { type:'application/pdf' }), 'cover_front.pdf');
-      const out2 = await PDFDocument.create();
-      const backEmb = await out2.embedPng(backPng);
-      const r2 = buildConvSheet(out2, [
-        { emb: backEmb, wMm: tgt.w, hMm: tgt.h }
-      ], paperVal, PAPERS, MM);
-      doDownload(new Blob([await out2.save()], { type:'application/pdf' }), 'cover_back.pdf');
-      produced.push({ label:'封面+书脊', wmm: sheet1W, hmm: tgt.h, orient: r1.orientName });
-      produced.push({ label:'封底', wmm: tgt.w, hmm: tgt.h, orient: r2.orientName });
-    }
-    const tgtName = convertTgtSize.value + (convertTgtOrient === 'landscape' ? ' 横向' : '');
-    const lines = produced.map(p => '· ' + p.label + '：' + p.wmm.toFixed(1) + ' mm × ' + p.hmm.toFixed(1) + ' mm' + (p.orient ? '（' + p.orient + '）' : ''));
-    msgEl.innerHTML = '✅ 已把一体书皮转为 <b>' + tgtName + '</b> 内页的书皮：<br>' + lines.join('<br>');
-  } catch (e) { msgEl.textContent = '出错了：' + e; }
-  finally { btnEl.disabled = false; }
-}
-// 转换模式事件
-dropConvert.onclick = () => convertFEl.click();
-convertFEl.onchange = () => pickConvert(convertFEl.files[0]);
-convertClearEl.onclick = (e) => { e.stopPropagation(); clearConvert(); };
-['dragover','dragenter'].forEach(ev => dropConvert.addEventListener(ev, e => { e.preventDefault(); dropConvert.classList.add('hot'); }));
-['dragleave','drop'].forEach(ev => dropConvert.addEventListener(ev, e => { e.preventDefault(); dropConvert.classList.remove('hot'); }));
-dropConvert.addEventListener('drop', e => { const f = e.dataTransfer.files[0]; if (f) pickConvert(f); });
-convertSrcSize.onchange = convertCheck;
-convertTgtSize.onchange = convertCheck;
-convertSrcOrientSeg.querySelectorAll('.opt').forEach(o => {
-  o.onclick = () => { convertSrcOrientSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); o.classList.add('on'); convertSrcOrient = o.dataset.orient; convertSpineEl.dataset.auto = '1'; convertCheck(); };
-});
-convertTgtOrientSeg.querySelectorAll('.opt').forEach(o => {
-  o.onclick = () => { convertTgtOrientSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); o.classList.add('on'); convertTgtOrient = o.dataset.orient; convertCheck(); };
-});
-convertSpineEl.addEventListener('input', () => { convertSpineEl.dataset.auto = '0'; convertCheck(); });
-convertOutSeg.querySelectorAll('.opt').forEach(o => {
-  o.onclick = () => {
-    convertOutSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on')); o.classList.add('on');
-    convertOut = o.dataset.out;
-    if (convertOut === 'split' && convertPaperEl.value === 'none') convertPaperEl.value = 'a4';
-    convertCheck();
-  };
-});
-convertPaperEl.onchange = convertCheck;
 
 // 十六进制颜色 -> rgb(0~1)
 function hexToRgb(hex){
@@ -41024,15 +40745,131 @@ async function a4tob5Generate(){
   }
 }
 
+// 增删 PDF：在原始文件基础上批量 增加 / 删减 / 替换（三种可一次同时完成；所有页码均指原始文件页码）
+async function editpdfGenerate(){
+  if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  if (isHarmonyOS && (inWeChat || inQQ)){
+    msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
+    return;
+  }
+  if (editpdfOps.size === 0){ msgEl.textContent = '⚠️ 请至少选择一种处理方式（增加 / 删减 / 替换）。'; return; }
+
+  btnEl.disabled = true;
+  msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
+  try {
+    const src = await loadPdf(fileObj);
+    const N = src.getPageCount();
+    const out = await PDFDocument.create();
+
+    // 原文件页面尺寸（以第 1 页为准），插入/替换页统一改为此尺寸
+    const _fcb = src.getPage(0).getCropBox();
+    const refW = _fcb.width, refH = _fcb.height;
+    // 生成一个输出页：页面尺寸 tW×tH，内部内容（源尺寸 srcW×srcH）等比缩放居中
+    const makeItem = (emb, srcW, srcH, tW, tH) => {
+      const scale = Math.min(tW / srcW, tH / srcH);
+      const dW = srcW * scale, dH = srcH * scale;
+      return { emb, pageW: tW, pageH: tH, drawW: dW, drawH: dH, drawX: (tW - dW) / 2, drawY: (tH - dH) / 2 };
+    };
+
+    // ---- 删减 ----
+    const delSet = new Set();
+    if (editpdfOps.has('del')){
+      const raw = editpdfDelPages.value.trim();
+      if (!raw){ msgEl.textContent = '⚠️ 已选「删减」，请填写要删减的页码（多个用英文逗号分隔）。'; btnEl.disabled=false; return; }
+      for (const tok of raw.split(',')){
+        const p = parseInt(tok.trim(), 10);
+        if (!Number.isInteger(p) || p < 1 || p > N){ msgEl.textContent = '⚠️ 删减页码无效：「' + tok + '」应为 1 ~ ' + N + ' 的正整数。'; btnEl.disabled=false; return; }
+        delSet.add(p);
+      }
+    }
+
+    // ---- 替换（上传单页 PDF，替换列出的每一页）----
+    let repItem = null;            // { emb, pageW, pageH, drawW, drawH, drawX, drawY }
+    const repTargets = [];
+    if (editpdfOps.has('rep')){
+      const raw = editpdfRepPages.value.trim();
+      if (!raw){ msgEl.textContent = '⚠️ 已选「替换」，请填写要替换的页码（多个用英文逗号分隔）。'; btnEl.disabled=false; return; }
+      if (!editpdfRepFileObj){ msgEl.textContent = '⚠️ 已选「替换」，请上传替换用的单页 PDF。'; btnEl.disabled=false; return; }
+      const repSrc = await loadPdf(editpdfRepFileObj);
+      if (repSrc.getPageCount() !== 1){ msgEl.textContent = '⚠️ 替换用的 PDF 必须是单页，当前为 ' + repSrc.getPageCount() + ' 页。'; btnEl.disabled=false; return; }
+      const repPg = repSrc.getPage(0);
+      const repCb = repPg.getCropBox();
+      repItem = makeItem(await safeEmbedPage(out, repSrc, repPg), repCb.width, repCb.height, refW, refH);
+      for (const tok of raw.split(',')){
+        const p = parseInt(tok.trim(), 10);
+        if (!Number.isInteger(p) || p < 1 || p > N){ msgEl.textContent = '⚠️ 替换页码无效：「' + tok + '」应为 1 ~ ' + N + ' 的正整数。'; btnEl.disabled=false; return; }
+        if (delSet.has(p)){ msgEl.textContent = '⚠️ 第 ' + p + ' 页同时被设为删减与替换，请去掉其一（以删减为准）。'; btnEl.disabled=false; return; }
+        repTargets.push(p);
+      }
+    }
+    const repSet = new Set(repTargets);
+
+    // ---- 增加（可多页，插入到原文件指定页之后）----
+    let addPages = null;           // { pos, pages:[{emb,cb}...] }
+    if (editpdfOps.has('add')){
+      const pos = parseInt(editpdfAddPos.value.trim(), 10);
+      if (!Number.isInteger(pos) || pos < 0 || pos > N){ msgEl.textContent = '⚠️ 插入位置无效：「' + editpdfAddPos.value + '」应为 0 ~ ' + N + '（0 = 插到最前，k = 插到第 k 页之后）。'; btnEl.disabled=false; return; }
+      if (!editpdfAddFileObj){ msgEl.textContent = '⚠️ 已选「增加」，请上传要插入的 PDF。'; btnEl.disabled=false; return; }
+      const addSrc = await loadPdf(editpdfAddFileObj);
+      const pages = [];
+      for (let i = 0; i < addSrc.getPageCount(); i++){
+        const pg = addSrc.getPage(i);
+        const cb = pg.getCropBox();
+        pages.push(makeItem(await safeEmbedPage(out, addSrc, pg), cb.width, cb.height, refW, refH));
+      }
+      addPages = { pos, pages };
+    }
+
+    // ---- 按原始页码顺序组装最终页序列 ----
+    const outItems = [];
+    const adds = addPages ? [addPages] : [];
+    adds.sort((a, b) => a.pos - b.pos);
+    let ap = 0;
+    const flush = (arr) => { for (const it of arr) outItems.push(it); };
+    while (ap < adds.length && adds[ap].pos === 0){ flush(adds[ap].pages); ap++; }       // 插到最前
+    for (let i = 1; i <= N; i++){
+      while (ap < adds.length && adds[ap].pos === i - 1){ flush(adds[ap].pages); ap++; } // 第 i-1 页之后
+      if (delSet.has(i)) continue;                       // 删减
+      if (repSet.has(i)){ outItems.push(repItem); continue; } // 替换（已统一为原文件尺寸）
+      const pg = src.getPage(i - 1);                    // 原页（保持自身尺寸）
+      const cb = pg.getCropBox();
+      outItems.push(makeItem(await safeEmbedPage(out, src, pg), cb.width, cb.height, cb.width, cb.height));
+    }
+    while (ap < adds.length){ flush(adds[ap].pages); ap++; }   // 插到最后（pos >= N）
+
+    // ---- 输出：原页保持自身尺寸；插入 / 替换页已统一为原文件尺寸，内容等比居中 ----
+    for (const it of outItems){
+      const np = out.addPage([it.pageW, it.pageH]);
+      np.drawPage(it.emb, { x: it.drawX, y: it.drawY, width: it.drawW, height: it.drawH });
+    }
+
+    const outBytes = await out.save();
+    doDownload(new Blob([outBytes], { type: 'application/pdf' }), '增删PDF_' + fileObj.name);
+
+    const toMM = v => Math.round(v / 2.834645669);
+    const added = addPages ? addPages.pages.length : 0;
+    let tip = '✅ 已完成（原 ' + N + ' 页 → 现 ' + outItems.length + ' 页）。\n· 增加 ' + added + ' 页\n· 删减 ' + delSet.size + ' 页\n· 替换 ' + repTargets.length + ' 页';
+    if (added > 0 || repTargets.length > 0){
+      tip += '\n· 插入 / 替换的页面已统一缩放为原文件页面尺寸（' + toMM(refW) + '×' + toMM(refH) + ' mm，内容等比居中不变形）';
+    }
+    tip += '\n开始下载。';
+    msgEl.textContent = tip;
+  } catch (e) {
+    msgEl.textContent = '出错了：' + e;
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
 btnEl.onclick = async () => {
   // 仅鸿蒙系统的微信/QQ 内置浏览器拦截下载，避免“暂无可用打开方式”死路；其他系统照常
   if (isHarmonyOS && (inWeChat || inQQ)){
     msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
     return;
   }
+  if (current === 'editpdf'){ await editpdfGenerate(); return; }
   if (current === 'extract'){ await extractGenerate(); return; }
   if (current === 'cover'){ await coverGenerate(); return; }
-  if (current === 'convert'){ await convertGenerate(); return; }
   if (current === 'a4tob5'){ await a4tob5Generate(); return; }
   if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; return; }
   btnEl.disabled = true;
