@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PDF 拼版工具 · 一页一折 / 小册子</title>
+<title>PDF 拼版工具 · 一张一折 / 整体对折（小册子）</title>
 <script>
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -39768,19 +39768,19 @@
       <div class="mode on" data-mode="fold">
         <span class="tick">✓</span>
         <div class="ic">📄</div>
-        <div class="t">一页一折</div>
+        <div class="t">一张一折</div>
         <div class="d">每 4 页一个独立小节，每张纸各自对折叠放。</div>
       </div>
       <div class="mode" data-mode="fold4">
         <span class="tick">✓</span>
         <div class="ic">📑</div>
-        <div class="t">四页一折</div>
+        <div class="t">四张一折</div>
         <div class="d">每 4 张纸一起对折成 16 页大节（节内骑马钉排版），多个大节叠放成书，省折纸次数。</div>
       </div>
       <div class="mode" data-mode="booklet">
         <span class="tick">✓</span>
         <div class="ic">📚</div>
-        <div class="t">小册子</div>
+        <div class="t">整体对折（小册子）</div>
         <div class="d">骑马钉装订：所有纸张嵌套、沿中缝装订成整本。</div>
       </div>
       <div class="mode" data-mode="cover">
@@ -39809,7 +39809,7 @@
       </div>
     </div>
 
-    <!-- 拼版（一页一折 / 小册子） -->
+    <!-- 拼版（一张一折 / 整体对折（小册子）） -->
     <div id="pdfBlock">
       <p class="label">② 上传 PDF</p>
       <div class="drop" id="drop">
@@ -39866,7 +39866,7 @@
       </div>
 
       <div class="fname" style="margin-top:8px;color:var(--sub);font-size:12px;line-height:1.5">
-        提示：插入 / 替换进去的 PDF 页面，会自动缩放为<b>原文件的页面尺寸</b>（以第 1 页为准，内容等比缩放居中、不变形）；原文件自身页面保持原尺寸。
+        提示：插入 / 替换进去的 PDF 页面，会自动缩放为<b>原文件的页面尺寸</b>（以第 1 页为准，内容等比缩放居中、不变形）；原文件自身页面保持原尺寸。「增加」也可勾选<b>增加空白 PDF</b> 改插空白页。
       </div>
 
       <div id="editpdfCount" class="fname" style="margin-top:10px;color:var(--sub);font-weight:500"></div>
@@ -39875,12 +39875,30 @@
       <div id="editpdfAdd" hidden style="margin-top:14px">
         <p class="label">插入位置（基于原文件页码，插入到该页之后；填 0 表示插到最前面）</p>
         <input type="number" id="editpdfAddPos" class="num" min="0" step="1" placeholder="例如 3（插到第 3 页之后）">
-        <div class="fname" style="margin-top:8px">上传要插入的 PDF（可多页，按原顺序依次插入）</div>
-        <div class="drop small-drop" id="dropAdd" style="margin-top:6px">
-          <input type="file" id="editpdfAddFile" accept="application/pdf,.pdf" hidden>
-          <div class="big">点击选择插入的 PDF</div>
-          <div class="small">仅支持 PDF，本地处理</div>
-          <div class="fname" id="editpdfAddName"></div>
+
+        <p class="label" style="margin-top:14px">插入内容（二选一）</p>
+        <div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center;font-size:13px;color:var(--sub);margin-bottom:10px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" id="editpdfAddBlank"> 增加空白 PDF（勾选后不用上传，插入空白页）
+          </label>
+          <label id="editpdfAddBlankWrap" style="display:none;align-items:center;gap:6px;cursor:pointer">
+            空白页数
+            <input type="number" id="editpdfAddBlankCount" min="1" step="1" value="1"
+                   style="width:84px;height:34px;border:1px solid var(--line);border-radius:8px;background:none;color:inherit;padding:0 8px;font-size:14px">
+          </label>
+        </div>
+
+        <div id="editpdfAddFileWrap">
+          <div class="fname" style="margin-top:8px">上传要插入的 PDF（可多页，按原顺序依次插入）</div>
+          <div class="drop small-drop" id="dropAdd" style="margin-top:6px">
+            <input type="file" id="editpdfAddFile" accept="application/pdf,.pdf" hidden>
+            <div class="big">点击选择插入的 PDF</div>
+            <div class="small">仅支持 PDF，本地处理</div>
+            <div class="fname" id="editpdfAddName"></div>
+          </div>
+        </div>
+        <div id="editpdfAddBlankNote" hidden class="fname" style="margin-top:8px;color:var(--sub);font-size:12px;line-height:1.5">
+          将插入<b>纯空白页</b>（尺寸与原文件页面一致：<span id="editpdfAddBlankSize">—</span>），适合留白 / 加写页 / 隔页。
         </div>
       </div>
 
@@ -39971,6 +39989,12 @@
       </select>
       <div id="paperHint" style="margin-top:6px;font-size:13px;min-height:18px"></div>
       <span style="color:#9aa3b2">二选一：① 直接导出书皮本身（真实尺寸）；② 把书皮按真实尺寸居中嵌入所选纸张，打印机自动选纸、印出来尺寸不变。</span>
+
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;color:var(--sub);line-height:1.6">
+        <input type="checkbox" id="coverScale" style="margin-top:3px;flex:none">
+        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.14%），勾选后书皮整体预放大 1/0.9714 倍：<br>
+        如 A5 封面 148×210 → <b>152.4×216.2 mm</b>、书脊 10 → 10.29 mm，小程序压完后正好回到真实尺寸。</span>
+      </label>
     </div>
 
 
@@ -39985,9 +40009,9 @@
       <b>使用方法（拼版）：</b><br>
       1. 选模式 → 选 PDF → 点“生成新 PDF”自动下载拼版结果；<br>
       2. <b>双面打印</b>下载的文件（每 2 个输出页 = 1 张纸正反面）；<br>
-      3. 一页一折：每张纸沿中线对折、按序叠放；<br>
-      4. 四页一折：每 4 张纸叠齐、沿中线一起对折成 16 页大节，大节按序叠放成书（省折纸次数）；<br>
-      5. 小册子：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
+      3. 一张一折：每张纸沿中线对折、按序叠放；<br>
+      4. 四张一折：每 4 张纸叠齐、沿中线一起对折成 16 页大节，大节按序叠放成书（省折纸次数）；<br>
+      5. 整体对折（小册子）：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
       <span style="color:#9aa3b2">提示：若点击后无法下载，请用系统浏览器（华为浏览器 / Chrome）打开本页，不要用微信/QQ 内置浏览器。</span>
     </div>
     <div class="how" id="coverHow" hidden>
@@ -39999,7 +40023,8 @@
       &nbsp;&nbsp;· 只传<b>封面</b> → 导出「封面+书脊」一张；<br>
       &nbsp;&nbsp;· 只传<b>封底</b> → 导出「封底+书脊」一张；<br>
       &nbsp;&nbsp;· <b>封面+封底</b>都传 → 自动拆成两张（封面+书脊 / 封底），正好两张 A4 打印；<br>
-      5. 两张 A4 分别打印，对齐书脊拼合即可包住内页。<br>
+      5. 两张 A4 分别打印，对齐书脊拼合即可包住内页；<br>
+      6. 提交到<b>小程序打印</b>时勾选「66党放大必备」：小程序会自动留边（约压到 97.14%），勾选后书皮预放大 1/0.9714 倍，印出来正好是真实尺寸。<br>
       <span style="color:#9aa3b2">说明：封面/封底会缩放到内页尺寸；书脊区域填充你选的颜色，并可印横排书名（封面侧在上、封底侧在下，阅读方向从上往下）。</span>
     </div>
     <div class="how" id="extractHow" hidden>
@@ -40099,6 +40124,7 @@ spineToWrap.style.display = spineGradChk.checked ? 'flex' : 'none';
 updateSpineFill();
 const paperEl    = document.getElementById('paper');
 const paperHint  = document.getElementById('paperHint');
+const coverScaleEl = document.getElementById('coverScale');
 const pdfBlock   = document.getElementById('pdfBlock');
 const coverBlock = document.getElementById('coverBlock');
 const pdfHow     = document.getElementById('pdfHow');
@@ -40124,6 +40150,13 @@ const editpdfAddPos   = document.getElementById('editpdfAddPos');
 const editpdfAddFile  = document.getElementById('editpdfAddFile');
 const editpdfAddName  = document.getElementById('editpdfAddName');
 const dropAddEl       = document.getElementById('dropAdd');
+// 增加：空白 PDF 相关
+const editpdfAddBlank      = document.getElementById('editpdfAddBlank');
+const editpdfAddBlankWrap  = document.getElementById('editpdfAddBlankWrap');
+const editpdfAddBlankCount = document.getElementById('editpdfAddBlankCount');
+const editpdfAddFileWrap   = document.getElementById('editpdfAddFileWrap');
+const editpdfAddBlankNote  = document.getElementById('editpdfAddBlankNote');
+const editpdfAddBlankSize  = document.getElementById('editpdfAddBlankSize');
 const editpdfDelPages = document.getElementById('editpdfDelPages');
 const editpdfRepPages = document.getElementById('editpdfRepPages');
 const editpdfRepFile  = document.getElementById('editpdfRepFile');
@@ -40189,6 +40222,7 @@ function pick(f){
   if (current === 'extract') showPageCount(f);
   if (current === 'editpdf'){
     loadPdf(f).then(s => { editpdfCountEl.textContent = '当前原文件共 ' + s.getPageCount() + ' 页（下方所有页码请按此范围填写）'; }).catch(()=>{});
+    syncAddBlank();
   }
 }
 // 提取模式：读取并显示 PDF 总页数
@@ -40238,6 +40272,7 @@ orientSeg.querySelectorAll('.opt').forEach(o => {
 });
 paperEl.onchange = checkPaper;
 spineEl.addEventListener('input', checkPaper);
+if (coverScaleEl) coverScaleEl.addEventListener('change', checkPaper);
 extractSeg.querySelectorAll('.opt').forEach(o => {
   o.onclick = () => {
     extractSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
@@ -40270,6 +40305,7 @@ editpdfSeg.querySelectorAll('.opt').forEach(o => {
     editpdfAddEl.hidden = !editpdfOps.has('add');
     editpdfDelEl.hidden = !editpdfOps.has('del');
     editpdfRepEl.hidden = !editpdfOps.has('rep');
+    if (editpdfOps.has('add')) syncAddBlank();
   };
 });
 function bindEditPdfDrop(drop, input, nameEl, setObj){
@@ -40281,6 +40317,23 @@ function bindEditPdfDrop(drop, input, nameEl, setObj){
 }
 bindEditPdfDrop(dropAddEl, editpdfAddFile, editpdfAddName, f => editpdfAddFileObj = f);
 bindEditPdfDrop(dropRepEl, editpdfRepFile, editpdfRepName, f => editpdfRepFileObj = f);
+
+// 「增加」二选一：上传 PDF ↔ 插入空白页。勾选空白时隐藏上传区、显示页数输入。
+async function syncAddBlank(){
+  const blank = !!(editpdfAddBlank && editpdfAddBlank.checked);
+  editpdfAddFileWrap.hidden = blank;
+  editpdfAddBlankWrap.style.display = blank ? 'flex' : 'none';
+  editpdfAddBlankNote.hidden = !blank;
+  if (blank && fileObj && editpdfAddBlankSize){
+    try {
+      const s = await loadPdf(fileObj);
+      const cb = s.getPage(0).getCropBox();
+      const mm = v => Math.round((v / 2.834645669) * 10) / 10;
+      editpdfAddBlankSize.textContent = mm(cb.width) + ' × ' + mm(cb.height) + ' mm（原文件第 1 页）';
+    } catch(e){ editpdfAddBlankSize.textContent = '与原文件第 1 页一致'; }
+  }
+}
+if (editpdfAddBlank) editpdfAddBlank.addEventListener('change', syncAddBlank);
 
 // 书皮输出是“自动”的：封面+封底都传 → 拆两张（按 A4 打印，默认纸张切到 A4）；
 // 只传一个 → 单张（默认“实际尺寸”）。这里只在两个都传且还是“实际尺寸”时帮用户选好 A4。
@@ -40357,14 +40410,27 @@ function fillSpine(page, x, y, w, h, fill){
 // 兼容 pdf-lib：某些 PDF（扫描件/特殊生成器）的页面缺少 /Contents，
 // embedPage 会直接抛 "Can't embed page with missing Contents"。
 // 嵌入前若发现缺失，补一个空 Contents 流即可。
-async function safeEmbedPage(out, srcDoc, srcPage){
+async function safeEmbedPage(out, srcDoc, srcPage, transformationMatrix){
   if (!srcPage.node.Contents()){
     srcPage.node.set(PDFName.of('Contents'), srcDoc.context.stream(''));
   }
   // 默认按 CropBox 嵌入：裁剪到 PDF 作者定义的可见区域；没有 CropBox 的会自动回退到 MediaBox。
   const cb = srcPage.getCropBox();
   const bbox = { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
-  return await out.embedPage(srcPage, bbox);
+  return await out.embedPage(srcPage, bbox, transformationMatrix);
+}
+
+// 把源页 /Rotate 烘焙进 Form XObject 的 Matrix 里。
+// 这样嵌入的内容本身已经处于阅读方向摆正、且在 [0,w]×[0,h] 框内的状态，
+// 后续 drawPage 不需要再传 rotation/rotate，避免 pdf-lib 旋转支点在 (0,0) 把内容推出页面。
+function bakeMatrix(rotDeg, w, h){
+  switch ((((rotDeg % 360) + 360) % 360)) {
+    case 0:   return [ 1, 0, 0, 1, 0, 0];
+    case 90:  return [ 0, 1,-1, 0, h, 0];
+    case 180: return [-1, 0, 0,-1, w, h];
+    case 270: return [ 0,-1, 1, 0, 0, w];
+  }
+  return [1, 0, 0, 1, 0, 0];
 }
 
 // 嵌入封面/封底（图片或 PDF 首页）
@@ -40389,13 +40455,14 @@ function drawFace(page, emb, x, y, Wp, Hp){
 function checkPaper(){
   if (!paperHint) return;
   const MM = 2.834645669;
+  const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9714) : 1;   // 66党放大：抵消小程序 97.14% 压缩
   const SIZES = { A4:[210,297], A5:[148,210], B5:[182,257] };
   const [sw, sh] = SIZES[sizeVal] || SIZES.A4;
   let W, H;
   if (orient === 'portrait'){ W = sw; H = sh; } else { W = sh; H = sw; }
-  const Wp = W * MM, Hp = H * MM;
+  const Wp = W * MM * K66, Hp = H * MM * K66;
   const spineMM = parseFloat(spineEl.value) || 0;
-  const spineP = spineMM * MM;
+  const spineP = spineMM * MM * K66;
   const paperVal = paperEl ? paperEl.value : 'none';
   // 封面+封底都传时默认按 A4 判断（拆两张 A4 打印）；其余用所选纸张
   let effPaper = paperVal;
@@ -40487,13 +40554,14 @@ async function coverGenerate(){
   msgEl.textContent = '处理中…（封面越大越慢，请稍候）';
   try {
     const MM = 2.834645669;
+    const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9714) : 1;   // 66党放大：抵消小程序 97.14% 压缩
     const SIZES = { A4:[210,297], A5:[148,210], B5:[182,257] };
     const [sw, sh] = SIZES[sizeVal] || SIZES.A4;
     let W, H;
     if (orient === 'portrait'){ W = sw; H = sh; } else { W = sh; H = sw; }
-    const Wp = W * MM, Hp = H * MM;
+    const Wp = W * MM * K66, Hp = H * MM * K66;
     const spineMM = parseFloat(spineEl.value) || 0;
-    const spineP = spineMM * MM;
+    const spineP = spineMM * MM * K66;
     // 自动判断输出：封面+封底都传 → 拆两张（A4 打印）；只传一个 → 单张（那个+书脊）
     const both = coverFile && backFile;
     const PAPERS = { a3:[297,420], a4:[210,297], a5:[148,210], b5:[182,257] };
@@ -40567,7 +40635,10 @@ async function coverGenerate(){
         ? '整张打印，沿书脊两侧折起包住内页即可。' + (anyTooBig ? '（书皮比所选纸张大，已按原尺寸导出，纸张选择被忽略）' : '')
         : '已按真实尺寸居中放在所选纸张上，打印机选对应纸张即可，书皮大小不变。';
     }
-    msgEl.innerHTML = '✅ 已生成书皮（内页各 ' + W + ' mm，书脊 ' + spineMM + ' mm）：<br>' + lines.join('<br>') + '<br>' + tail;
+    const sizeNote = K66 > 1
+      ? '<br>📐 66党放大已生效：内页 ' + W + '×' + H + ' → <b>' + (W*K66).toFixed(1) + '×' + (H*K66).toFixed(1) + ' mm</b>，书脊 ' + spineMM + ' → <b>' + (spineMM*K66).toFixed(2) + ' mm</b>（小程序压到 97.14% 后正好回到真实尺寸）。'
+      : '';
+    msgEl.innerHTML = '✅ 已生成书皮（内页各 ' + W + ' mm，书脊 ' + spineMM + ' mm）：<br>' + lines.join('<br>') + '<br>' + tail + sizeNote;
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
@@ -40579,15 +40650,15 @@ async function coverGenerate(){
 function pairsFor(mode, total){
   const res = [];
   if (mode === 'fold'){
-    // 一页一折：每 4 个 PDF 页 = 1 张纸，各自对折成 4 页小节（每张纸单独折）
+    // 一张一折：每 4 个 PDF 页 = 1 张纸，各自对折成 4 页小节（每张纸单独折）
     for (let k = 0; k < total / 4; k++){
       const a = 4 * k + 1;
       res.push([a + 3, a]);        // (a+3, a)
       res.push([a + 1, a + 2]);    // (a+1, a+2)
     }
   } else if (mode === 'fold4'){
-    // 四页一折：每 4 张纸 = 1 个大节（16 个 PDF 页），节内用骑马钉嵌套排版，
-    // 4 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“小册子”）。
+    // 四张一折：每 4 张纸 = 1 个大节（16 个 PDF 页），节内用骑马钉嵌套排版，
+    // 4 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折（小册子）”）。
     const SHEETS = 4;                  // 每次一起折的纸张数
     const pPerSection = 4 * SHEETS;    // 每节 PDF 页数 = 16
     for (let base = 0; base < total; base += pPerSection){
@@ -40804,18 +40875,27 @@ async function editpdfGenerate(){
     }
     const repSet = new Set(repTargets);
 
-    // ---- 增加（可多页，插入到原文件指定页之后）----
+    // ---- 增加（上传 PDF 可多页 / 或插入空白页，插入到原文件指定页之后）----
     let addPages = null;           // { pos, pages:[{emb,cb}...] }
+    let addBlank = 0;              // 本次插入的空白页数
     if (editpdfOps.has('add')){
       const pos = parseInt(editpdfAddPos.value.trim(), 10);
       if (!Number.isInteger(pos) || pos < 0 || pos > N){ msgEl.textContent = '⚠️ 插入位置无效：「' + editpdfAddPos.value + '」应为 0 ~ ' + N + '（0 = 插到最前，k = 插到第 k 页之后）。'; btnEl.disabled=false; return; }
-      if (!editpdfAddFileObj){ msgEl.textContent = '⚠️ 已选「增加」，请上传要插入的 PDF。'; btnEl.disabled=false; return; }
-      const addSrc = await loadPdf(editpdfAddFileObj);
       const pages = [];
-      for (let i = 0; i < addSrc.getPageCount(); i++){
-        const pg = addSrc.getPage(i);
-        const cb = pg.getCropBox();
-        pages.push(makeItem(await safeEmbedPage(out, addSrc, pg), cb.width, cb.height, refW, refH));
+      if (editpdfAddBlank && editpdfAddBlank.checked){
+        // 二选一：插入空白页（尺寸 = 原文件第 1 页，无内容）
+        const n = parseInt((editpdfAddBlankCount && editpdfAddBlankCount.value) || '1', 10);
+        if (!Number.isInteger(n) || n < 1){ msgEl.textContent = '⚠️ 已选「增加空白 PDF」，空白页数应为 ≥ 1 的整数。'; btnEl.disabled=false; return; }
+        for (let i = 0; i < n; i++) pages.push(makeItem(null, refW, refH, refW, refH));
+        addBlank = n;
+      } else {
+        if (!editpdfAddFileObj){ msgEl.textContent = '⚠️ 已选「增加」，请上传要插入的 PDF，或勾选「增加空白 PDF」。'; btnEl.disabled=false; return; }
+        const addSrc = await loadPdf(editpdfAddFileObj);
+        for (let i = 0; i < addSrc.getPageCount(); i++){
+          const pg = addSrc.getPage(i);
+          const cb = pg.getCropBox();
+          pages.push(makeItem(await safeEmbedPage(out, addSrc, pg), cb.width, cb.height, refW, refH));
+        }
       }
       addPages = { pos, pages };
     }
@@ -40837,10 +40917,10 @@ async function editpdfGenerate(){
     }
     while (ap < adds.length){ flush(adds[ap].pages); ap++; }   // 插到最后（pos >= N）
 
-    // ---- 输出：原页保持自身尺寸；插入 / 替换页已统一为原文件尺寸，内容等比居中 ----
+    // ---- 输出：原页保持自身尺寸；插入 / 替换页已统一为原文件尺寸，内容等比居中；空白页不画内容 ----
     for (const it of outItems){
       const np = out.addPage([it.pageW, it.pageH]);
-      np.drawPage(it.emb, { x: it.drawX, y: it.drawY, width: it.drawW, height: it.drawH });
+      if (it.emb) np.drawPage(it.emb, { x: it.drawX, y: it.drawY, width: it.drawW, height: it.drawH });
     }
 
     const outBytes = await out.save();
@@ -40848,9 +40928,15 @@ async function editpdfGenerate(){
 
     const toMM = v => Math.round(v / 2.834645669);
     const added = addPages ? addPages.pages.length : 0;
-    let tip = '✅ 已完成（原 ' + N + ' 页 → 现 ' + outItems.length + ' 页）。\n· 增加 ' + added + ' 页\n· 删减 ' + delSet.size + ' 页\n· 替换 ' + repTargets.length + ' 页';
-    if (added > 0 || repTargets.length > 0){
+    const addNote = addBlank > 0
+      ? (addBlank === added ? '（全部为空白页）' : '（其中空白 ' + addBlank + ' 页）')
+      : '';
+    let tip = '✅ 已完成（原 ' + N + ' 页 → 现 ' + outItems.length + ' 页）。\n· 增加 ' + added + ' 页' + addNote + '\n· 删减 ' + delSet.size + ' 页\n· 替换 ' + repTargets.length + ' 页';
+    if (added - addBlank > 0 || repTargets.length > 0){
       tip += '\n· 插入 / 替换的页面已统一缩放为原文件页面尺寸（' + toMM(refW) + '×' + toMM(refH) + ' mm，内容等比居中不变形）';
+    }
+    if (addBlank > 0){
+      tip += '\n· 空白页尺寸与原文件一致（' + toMM(refW) + '×' + toMM(refH) + ' mm）';
     }
     tip += '\n开始下载。';
     msgEl.textContent = tip;
@@ -40879,13 +40965,21 @@ btnEl.onclick = async () => {
     const N = src.getPageCount();
     const total = Math.ceil(N / 4) * 4;            // 向上取到 4 的倍数（多出的位置留空）
     const out = await PDFDocument.create();
+    const firstRot = src.getPage(0).getRotation().angle;
     const firstCb = src.getPage(0).getCropBox();
-    const W = firstCb.width;
-    const H = firstCb.height;
+    // 以第一页“旋转后”尺寸作为整版基准（拼版假定同方向；90/270 需交换宽高）
+    const swap = (firstRot === 90 || firstRot === 270);
+    const W = swap ? firstCb.height : firstCb.width;
+    const H = swap ? firstCb.width : firstCb.height;
 
-    // 逐页独立嵌入，避免 pdf-lib 一次 embedPdf 后多处 drawPage 丢失内容
+    // 逐页独立嵌入，并把源页 /Rotate 烘焙进 XObject Matrix，避免拼版后上下/左右颠倒
     const emb = [];
-    for (let i = 0; i < N; i++) emb.push(await safeEmbedPage(out, src, src.getPage(i)));
+    for (let i = 0; i < N; i++) {
+      const pg = src.getPage(i);
+      const cb = pg.getCropBox();
+      const rot = pg.getRotation().angle;
+      emb.push(await safeEmbedPage(out, src, pg, bakeMatrix(rot, cb.width, cb.height)));
+    }
 
     for (const [L, R] of pairsFor(current, total)) {
       const page = out.addPage([2 * W, H]);
