@@ -39849,8 +39849,8 @@
 
       <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;line-height:1.55">
         <input type="checkbox" id="a4tob5Scale" style="margin-top:3px;flex:none">
-        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.14%），勾选后内页框整体预放大 1/0.9714 倍：<br>
-        A5（148×210）→ <b>152.4×216.2</b> mm；小B5（176×250）→ 181.2×257.4 mm；大B5（182×257）→ 187.4×264.6 mm。压完回到真实尺寸。</span>
+        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.05%），勾选后内页框整体预放大 1/0.9705 倍：<br>
+        A5（148×210）→ <b>152.5×216.4</b> mm；小B5（176×250）→ 181.3×257.6 mm；大B5（182×257）→ 187.5×264.8 mm。压完回到真实尺寸。</span>
       </label>
 
       <p class="label" style="margin-top:14px">④ 打印纸张</p>
@@ -39999,8 +39999,8 @@
 
       <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;color:var(--sub);line-height:1.6">
         <input type="checkbox" id="coverScale" style="margin-top:3px;flex:none">
-        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.14%），勾选后书皮整体预放大 1/0.9714 倍：<br>
-        如 A5 封面 148×210 → <b>152.4×216.2 mm</b>、书脊 10 → 10.29 mm，小程序压完后正好回到真实尺寸。</span>
+        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.05%），勾选后书皮整体预放大 1/0.9705 倍：<br>
+        如 A5 封面 148×210 → <b>152.5×216.4 mm</b>、书脊 10 → 10.30 mm，小程序压完后正好回到真实尺寸。</span>
       </label>
     </div>
 
@@ -40031,7 +40031,7 @@
       &nbsp;&nbsp;· 只传<b>封底</b> → 导出「封底+书脊」一张；<br>
       &nbsp;&nbsp;· <b>封面+封底</b>都传 → 自动拆成两张（封面+书脊 / 封底），正好两张 A4 打印；<br>
       5. 两张 A4 分别打印，对齐书脊拼合即可包住内页；<br>
-      6. 提交到<b>小程序打印</b>时勾选「66党放大必备」：小程序会自动留边（约压到 97.14%），勾选后书皮预放大 1/0.9714 倍，印出来正好是真实尺寸。<br>
+      6. 提交到<b>小程序打印</b>时勾选「66党放大必备」：小程序会自动留边（约压到 97.05%），勾选后书皮预放大 1/0.9705 倍，印出来正好是真实尺寸。<br>
       <span style="color:#9aa3b2">说明：封面/封底会缩放到内页尺寸；书脊区域填充你选的颜色，并可印横排书名（封面侧在上、封底侧在下，阅读方向从上往下）。</span>
     </div>
     <div class="how" id="extractHow" hidden>
@@ -40046,7 +40046,7 @@
       1. 上传 PDF（你的书稿 / 资料，内容比例建议与所选内页尺寸接近）；<br>
       2. 选内页尺寸：<b>小 B5（176×250）</b> / <b>大 B5（182×257）</b> / <b>A5（148×210）</b>；<br>
       3. 选放置方式：居中（裁四边）或顶格左右交替（只裁右+下，需沿长边双面）；<br>
-      4. 若用<b>小程序打印</b>，勾选「66党放大必备」：内页框预放大 1/0.9714 倍（A5→152.4×216.2 mm 等），压完回到真实尺寸；<br>
+      4. 若用<b>小程序打印</b>，勾选「66党放大必备」：内页框预放大 1/0.9705 倍（A5→152.5×216.4 mm 等），压完回到真实尺寸；<br>
       5. 打印纸张固定 A4；点“生成新 PDF”→ 每页内容居中放在 A4 上的内页白框内（A4 白底）；<br>
       6. 用 A4 纸打印，沿内页框裁边，即得所选尺寸资料。<br>
       <span style="color:#9aa3b2">提示：内容会按原比例放进内页框、不变形；若 PDF 比例与所选尺寸不一致，框内会留白。A4 打印后手动裁边即可。</span>
@@ -40466,7 +40466,7 @@ function drawFace(page, emb, x, y, Wp, Hp){
 function checkPaper(){
   if (!paperHint) return;
   const MM = 2.834645669;
-  const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9714) : 1;   // 66党放大：抵消小程序 97.14% 压缩
+  const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9705) : 1;   // 66党放大：抵消小程序 97.05% 压缩
   const SIZES = { A4:[210,297], A5:[148,210], B5:[182,257] };
   const [sw, sh] = SIZES[sizeVal] || SIZES.A4;
   let W, H;
@@ -40565,7 +40565,7 @@ async function coverGenerate(){
   msgEl.textContent = '处理中…（封面越大越慢，请稍候）';
   try {
     const MM = 2.834645669;
-    const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9714) : 1;   // 66党放大：抵消小程序 97.14% 压缩
+    const K66 = coverScaleEl && coverScaleEl.checked ? (1 / 0.9705) : 1;   // 66党放大：抵消小程序 97.05% 压缩
     const SIZES = { A4:[210,297], A5:[148,210], B5:[182,257] };
     const [sw, sh] = SIZES[sizeVal] || SIZES.A4;
     let W, H;
@@ -40647,7 +40647,7 @@ async function coverGenerate(){
         : '已按真实尺寸居中放在所选纸张上，打印机选对应纸张即可，书皮大小不变。';
     }
     const sizeNote = K66 > 1
-      ? '<br>📐 66党放大已生效：内页 ' + W + '×' + H + ' → <b>' + (W*K66).toFixed(1) + '×' + (H*K66).toFixed(1) + ' mm</b>，书脊 ' + spineMM + ' → <b>' + (spineMM*K66).toFixed(2) + ' mm</b>（小程序压到 97.14% 后正好回到真实尺寸）。'
+      ? '<br>📐 66党放大已生效：内页 ' + W + '×' + H + ' → <b>' + (W*K66).toFixed(1) + '×' + (H*K66).toFixed(1) + ' mm</b>，书脊 ' + spineMM + ' → <b>' + (spineMM*K66).toFixed(2) + ' mm</b>（小程序压到 97.05% 后正好回到真实尺寸）。'
       : '';
     msgEl.innerHTML = '✅ 已生成书皮（内页各 ' + W + ' mm，书脊 ' + spineMM + ' mm）：<br>' + lines.join('<br>') + '<br>' + tail + sizeNote;
   } catch (e) {
@@ -40787,7 +40787,7 @@ async function a4tob5Generate(){
     const SIZELABEL = { small:'小B5', large:'大B5', a5:'A5' };
     const key = a4tob5Size;
     const [baseW, baseH] = SIZES[key];
-    const K66 = a4tob5ScaleK66 ? (1 / 0.9714) : 1;       // 66党放大：抵消小程序 97.14% 压缩
+    const K66 = a4tob5ScaleK66 ? (1 / 0.9705) : 1;       // 66党放大：抵消小程序 97.05% 压缩
     const bwMm = baseW * K66, bhMm = baseH * K66;
     const bw = bwMm * MM, bh = bhMm * MM;
     const edge = (a4tob5PlaceMode === 'edge');           // 顶格左右交替：需沿长边双面，只裁右+下
