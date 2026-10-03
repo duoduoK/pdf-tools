@@ -29616,6 +29616,10 @@
                 name += charFromCode(byte);
                 this.bytes.next();
             }
+            // PATCH(2026-10-03): 按 PDF 规范反转义名字里的 #XX。
+            // 否则源 PDF 资源键 /T1#5f2（= T1_2）会被原样读入再二次转义成 /T1#235f2（= T1#5f2），
+            // 与内容流引用 /T1_2 对不上 → 复制页面后矢量文字因找不到字体全部空白（图片不受影响）。
+            name = name.replace(/#([0-9A-Fa-f]{2})/g, function (_, h) { return charFromCode(parseInt(h, 16)); });
             return PDFName.of(name);
         };
         PDFObjectParser.prototype.parseArray = function () {
