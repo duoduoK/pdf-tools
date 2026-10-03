@@ -40432,7 +40432,21 @@ async function safeEmbedPage(out, srcDoc, srcPage, transformationMatrix){
   // 默认按 CropBox 嵌入：裁剪到 PDF 作者定义的可见区域；没有 CropBox 的会自动回退到 MediaBox。
   const cb = srcPage.getCropBox();
   const bbox = { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
-  return await out.embedPage(srcPage, bbox, transformationMatrix);
+  // FIX(2026-10-03): pdf-lib embedPage 的 BBox 只负责裁剪，不会把内容平移回原点。
+  // 当源页 CropBox 原点不是 (0,0)（如有些书把小页面放在 A3 大 MediaBox 中央）时，
+  // 内容会带着源页绝对坐标被 drawPage 画到目标页外，表现为内容缩小错位、大片空白。
+  // 此处先把 CropBox 偏移平移回原点，再叠加调用方给的变换矩阵（行向量复合 M = T·R）。
+  const T = [1, 0, 0, 1, -cb.x, -cb.y];
+  const R = transformationMatrix || [1, 0, 0, 1, 0, 0];
+  const mul = (A, B) => [
+    A[0] * B[0] + A[1] * B[2],
+    A[0] * B[1] + A[1] * B[3],
+    A[2] * B[0] + A[3] * B[2],
+    A[2] * B[1] + A[3] * B[3],
+    A[4] * B[0] + A[5] * B[2] + B[4],
+    A[4] * B[1] + A[5] * B[3] + B[5]
+  ];
+  return await out.embedPage(srcPage, bbox, mul(T, R));
 }
 
 // 把源页 /Rotate 烘焙进 Form XObject 的 Matrix 里。
