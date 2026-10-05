@@ -39828,6 +39828,11 @@
         <input type="file" id="f" accept="application/pdf,.pdf" hidden>
         <div class="fname" id="fname"></div>
       </div>
+      <label id="splitWrap" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer;font-size:13px;line-height:1.55">
+        <input type="checkbox" id="splitSpreads" checked style="margin-top:3px;flex:none">
+        <span><b>跨页版自动拆分</b> —— 源 PDF 里<b>横版页</b>（宽&gt;高，即左右两书页拼成的跨页，如微信下载的漫画跨页版）自动按中线拆成左右两页再拼版；竖版页保持整页。<br>
+        拆分后：每张输出 PDF 页 = 2 个书页，双面打印 1 张纸 = 4 个书页，对折即成 4 页小节。若原书本身就是横版单页（不是跨页），请取消勾选。</span>
+      </label>
     </div>
 
     <!-- 提取 -->
@@ -40211,6 +40216,8 @@ function showMode(mode){
   extractBlock.hidden = !isExtract;
   editpdfBlock.hidden = !isEditpdf;
   pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4');
+  const splitWrapEl = document.getElementById('splitWrap');
+  if (splitWrapEl) splitWrapEl.hidden = pdfHow.hidden;
   coverHow.hidden    = !isCover;
   extractHow.hidden  = !isExtract;
   a4tob5How.hidden   = !isA4tob5;
@@ -40348,7 +40355,7 @@ async function syncAddBlank(){
   if (blank && fileObj && editpdfAddBlankSize){
     try {
       const s = await loadPdf(fileObj);
-      const cb = s.getPage(0).getCropBox();
+      const cb = visibleBoxOf(s.getPage(0));
       const mm = v => Math.round((v / 2.834645669) * 10) / 10;
       editpdfAddBlankSize.textContent = mm(cb.width) + ' × ' + mm(cb.height) + ' mm（原文件第 1 页）';
     } catch(e){ editpdfAddBlankSize.textContent = '与原文件第 1 页一致'; }
@@ -40428,16 +40435,34 @@ function fillSpine(page, x, y, w, h, fill){
   }
 }
 
+// CLAMP(2026-10-05): 有些 PDF 的 CropBox 比 MediaBox 还大（不合规范，如微信下载的
+// Little Fox 漫画跨页版：MediaBox 是 418×595 竖版单页、CropBox 却是 839 宽的整跨页）。
+// 阅读器实际显示的是 MediaBox；若按 CropBox 嵌入就会把整个跨页内容都带进来。
+// 取两者交集作为「真实可见区域」：正常书交集=CropBox，行为不变；坏框 PDF 自动纠正。
+function visibleBoxOf(pg){
+  const cb = pg.getCropBox();
+  try {
+    const mb = pg.getMediaBox();
+    const x1 = Math.max(cb.x, mb.x), y1 = Math.max(cb.y, mb.y);
+    const x2 = Math.min(cb.x + cb.width, mb.x + mb.width);
+    const y2 = Math.min(cb.y + cb.height, mb.y + mb.height);
+    if (x2 - x1 > 1 && y2 - y1 > 1) return { x: x1, y: y1, width: x2 - x1, height: y2 - y1 };
+  } catch(e){}
+  return cb;
+}
+
 // 兼容 pdf-lib：某些 PDF（扫描件/特殊生成器）的页面缺少 /Contents，
 // embedPage 会直接抛 "Can't embed page with missing Contents"。
 // 嵌入前若发现缺失，补一个空 Contents 流即可。
-async function safeEmbedPage(out, srcDoc, srcPage, transformationMatrix){
+async function safeEmbedPage(out, srcDoc, srcPage, transformationMatrix, bboxOverride){
   if (!srcPage.node.Contents()){
     srcPage.node.set(PDFName.of('Contents'), srcDoc.context.stream(''));
   }
-  // 默认按 CropBox 嵌入：裁剪到 PDF 作者定义的可见区域；没有 CropBox 的会自动回退到 MediaBox。
-  const cb = srcPage.getCropBox();
-  const bbox = { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
+  // 默认按 CropBox∩MediaBox 嵌入：裁剪到 PDF 作者定义的可见区域。
+  // SPLIT(2026-10-05): bboxOverride 允许调用方只嵌入可见区域的一部分（跨页版左右拆分用），
+  // 坐标为未旋转页面绝对坐标（与 CropBox 同一坐标系）。
+  const cb = visibleBoxOf(srcPage);
+  const bbox = bboxOverride || { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
   // FIX(2026-10-03): pdf-lib embedPage 的 BBox 只负责裁剪，不会把内容平移回原点。
   // 当源页 CropBox 原点不是 (0,0)（如有些书把小页面放在 A3 大 MediaBox 中央）时，
   // 内容会带着源页绝对坐标被 drawPage 画到目标页外，表现为内容缩小错位、大片空白。
@@ -40759,7 +40784,7 @@ async function extractGenerate(){
       }
       const out = await PDFDocument.create();
       const pg = src.getPage(p - 1);
-      const cb = pg.getCropBox();
+      const cb = visibleBoxOf(pg);
       const emb = await safeEmbedPage(out, src, pg);
       const np = out.addPage([cb.width, cb.height]);
       np.drawPage(emb, { x:0, y:0, width: cb.width, height: cb.height });
@@ -40773,7 +40798,7 @@ async function extractGenerate(){
       }
       const out1 = await PDFDocument.create();
       const pg1 = src.getPage(0);
-      const cb1 = pg1.getCropBox();
+      const cb1 = visibleBoxOf(pg1);
       const emb1 = await safeEmbedPage(out1, src, pg1);
       const n1 = out1.addPage([cb1.width, cb1.height]);
       n1.drawPage(emb1, { x:0, y:0, width: cb1.width, height: cb1.height });
@@ -40781,7 +40806,7 @@ async function extractGenerate(){
 
       const out2 = await PDFDocument.create();
       const pgL = src.getPage(N - 1);
-      const cbL = pgL.getCropBox();
+      const cbL = visibleBoxOf(pgL);
       const emb2 = await safeEmbedPage(out2, src, pgL);
       const n2 = out2.addPage([cbL.width, cbL.height]);
       n2.drawPage(emb2, { x:0, y:0, width: cbL.width, height: cbL.height });
@@ -40824,7 +40849,7 @@ async function a4tob5Generate(){
     for (let i = 0; i < N; i++) emb.push(await safeEmbedPage(out, src, src.getPage(i)));
 
     for (let i = 0; i < N; i++){
-      const cb = src.getPage(i).getCropBox();
+      const cb = visibleBoxOf(src.getPage(i));
       const cbw = cb.width, cbh = cb.height;
       const scale = Math.min(bw / cbw, bh / cbh);         // 按原比例放进 B5 框（contain，不变形）
       const dW = cbw * scale, dH = cbh * scale;
@@ -40871,7 +40896,7 @@ async function editpdfGenerate(){
     const out = await PDFDocument.create();
 
     // 原文件页面尺寸（以第 1 页为准），插入/替换页统一改为此尺寸
-    const _fcb = src.getPage(0).getCropBox();
+    const _fcb = visibleBoxOf(src.getPage(0));
     const refW = _fcb.width, refH = _fcb.height;
     // 生成一个输出页：页面尺寸 tW×tH，内部内容（源尺寸 srcW×srcH）等比缩放居中
     const makeItem = (emb, srcW, srcH, tW, tH) => {
@@ -40902,7 +40927,7 @@ async function editpdfGenerate(){
       const repSrc = await loadPdf(editpdfRepFileObj);
       if (repSrc.getPageCount() !== 1){ msgEl.textContent = '⚠️ 替换用的 PDF 必须是单页，当前为 ' + repSrc.getPageCount() + ' 页。'; btnEl.disabled=false; return; }
       const repPg = repSrc.getPage(0);
-      const repCb = repPg.getCropBox();
+      const repCb = visibleBoxOf(repPg);
       repItem = makeItem(await safeEmbedPage(out, repSrc, repPg), repCb.width, repCb.height, refW, refH);
       for (const tok of raw.split(/[,，]/)){
         const p = parseInt(tok.trim(), 10);
@@ -40931,7 +40956,7 @@ async function editpdfGenerate(){
         const addSrc = await loadPdf(editpdfAddFileObj);
         for (let i = 0; i < addSrc.getPageCount(); i++){
           const pg = addSrc.getPage(i);
-          const cb = pg.getCropBox();
+          const cb = visibleBoxOf(pg);
           pages.push(makeItem(await safeEmbedPage(out, addSrc, pg), cb.width, cb.height, refW, refH));
         }
       }
@@ -40950,7 +40975,7 @@ async function editpdfGenerate(){
       if (delSet.has(i)) continue;                       // 删减
       if (repSet.has(i)){ outItems.push(repItem); continue; } // 替换（已统一为原文件尺寸）
       const pg = src.getPage(i - 1);                    // 原页（保持自身尺寸）
-      const cb = pg.getCropBox();
+      const cb = visibleBoxOf(pg);
       outItems.push(makeItem(await safeEmbedPage(out, src, pg), cb.width, cb.height, cb.width, cb.height));
     }
     while (ap < adds.length){ flush(adds[ap].pages); ap++; }   // 插到最后（pos >= N）
@@ -41001,34 +41026,71 @@ btnEl.onclick = async () => {
   try {
     const src = await loadPdf(fileObj);
     const N = src.getPageCount();
-    const total = Math.ceil(N / 4) * 4;            // 向上取到 4 的倍数（多出的位置留空）
     const out = await PDFDocument.create();
+    const splitSpreadsEl = document.getElementById('splitSpreads');
+    const doSplit = !!(splitSpreadsEl && splitSpreadsEl.checked);
     const firstRot = src.getPage(0).getRotation().angle;
-    const firstCb = src.getPage(0).getCropBox();
+    const firstCb = visibleBoxOf(src.getPage(0));
     // 以第一页“旋转后”尺寸作为整版基准（拼版假定同方向；90/270 需交换宽高）
     const swap = (firstRot === 90 || firstRot === 270);
-    const W = swap ? firstCb.height : firstCb.width;
-    const H = swap ? firstCb.width : firstCb.height;
+    const firstW = swap ? firstCb.height : firstCb.width;
+    const firstH = swap ? firstCb.width : firstCb.height;
+    // SPLIT(2026-10-05): 跨页版 PDF 支持——横版页（旋转后 W > H，即左右两书页拼成的跨页）
+    // 自动按中线拆成左右两页；竖版页保持整页。基准尺寸按“书页”（拆分后的半页）计。
+    const firstIsSpread = doSplit && (firstW > firstH * 1.01);
+    const W = firstIsSpread ? firstW / 2 : firstW;
+    const H = firstH;
 
-    // 逐页独立嵌入，并把源页 /Rotate 烘焙进 XObject Matrix，避免拼版后上下/左右颠倒
+    // 逐页独立嵌入，并把源页 /Rotate 烘焙进 XObject Matrix，避免拼版后上下/左右颠倒。
+    // 横版跨页页拆成左右两个嵌入，保持阅读顺序（左半先、右半后）。
     const emb = [];
+    let spreadCnt = 0, singleCnt = 0;
     for (let i = 0; i < N; i++) {
       const pg = src.getPage(i);
-      const cb = pg.getCropBox();
+      const cb = visibleBoxOf(pg);
       const rot = pg.getRotation().angle;
-      emb.push(await safeEmbedPage(out, src, pg, bakeMatrix(rot, cb.width, cb.height)));
+      const swp = (rot === 90 || rot === 270);
+      const pw = swp ? cb.height : cb.width;   // 旋转后视觉宽
+      const ph = swp ? cb.width : cb.height;   // 旋转后视觉高
+      const bm = bakeMatrix(rot, cb.width, cb.height);
+      if (doSplit && pw > ph * 1.01) {
+        // 视图空间的左/右半 → 未旋转 CropBox 局部坐标区间
+        const w = cb.width, h = cb.height;
+        let Lr, Rr;
+        if (rot === 90){       // 视图左半 = 页面上半
+          Lr = { x0: 0,   y0: h/2, x1: w,     y1: h   }; Rr = { x0: 0, y0: 0,   x1: w,     y1: h/2 };
+        } else if (rot === 180){ // 视图左半 = 页面右半
+          Lr = { x0: w/2, y0: 0,   x1: w,     y1: h   }; Rr = { x0: 0, y0: 0,   x1: w/2,   y1: h   };
+        } else if (rot === 270){ // 视图左半 = 页面下半
+          Lr = { x0: 0,   y0: 0,   x1: w,     y1: h/2 }; Rr = { x0: 0, y0: h/2, x1: w,     y1: h   };
+        } else {               // rot 0
+          Lr = { x0: 0,   y0: 0,   x1: w/2,   y1: h   }; Rr = { x0: w/2, y0: 0, x1: w,     y1: h   };
+        }
+        const bb = r => ({ left: cb.x + r.x0, bottom: cb.y + r.y0, right: cb.x + r.x1, top: cb.y + r.y1 });
+        emb.push(await safeEmbedPage(out, src, pg, bm, bb(Lr)));
+        emb.push(await safeEmbedPage(out, src, pg, bm, bb(Rr)));
+        spreadCnt++;
+      } else {
+        emb.push(await safeEmbedPage(out, src, pg, bm));
+        singleCnt++;
+      }
     }
+    const U = emb.length;                          // “书页”总数（跨页已拆开）
+    const total = Math.ceil(U / 4) * 4;            // 向上取到 4 的倍数（多出的位置留空）
 
     for (const [L, R] of pairsFor(current, total)) {
       const page = out.addPage([2 * W, H]);
-      if (L - 1 < N) page.drawPage(emb[L - 1], { x: 0, y: 0, width: W, height: H });
-      if (R - 1 < N) page.drawPage(emb[R - 1], { x: W, y: 0, width: W, height: H });
+      if (L - 1 < U) page.drawPage(emb[L - 1], { x: 0, y: 0, width: W, height: H });
+      if (R - 1 < U) page.drawPage(emb[R - 1], { x: W, y: 0, width: W, height: H });
     }
 
     const outBytes = await out.save();
     const blob = new Blob([outBytes], { type: 'application/pdf' });
     doDownload(blob, (current === 'booklet' ? 'booklet_' : current === 'fold4' ? 'fold4_' : 'fold_') + fileObj.name);
-    msgEl.textContent = `✅ 已生成（${N} 页原书 → ${total / 2} 张跨页，双面打印 = ${total / 4} 张纸）。\n开始下载，双面打印后对折即可。`;
+    const splitNote = spreadCnt > 0
+      ? '\n📖 跨页版已自动拆分：' + spreadCnt + ' 个横版跨页 → ' + (spreadCnt * 2) + ' 个书页 + ' + singleCnt + ' 个整页 = 共 ' + U + ' 页书（每张输出页 = 2 个书页）。'
+      : '';
+    msgEl.textContent = `✅ 已生成（${U} 页书 → ${total / 2} 张跨页，双面打印 = ${total / 4} 张纸）。${splitNote}\n开始下载，双面打印后对折即可。`;
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
