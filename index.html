@@ -27084,7 +27084,13 @@
         return RunLengthStream;
     }(DecodeStream));
 
+    // FIX(2026-10-05): 空（0 字节）压缩流直接返回空，不进 FlateStream 构造器。
+    // 否则 FlateStream 读到 EOF 会抛 "Invalid header in flate stream: -1, -1"，
+    // 导致整本含空内容流的 PDF（如部分页为空白页的扫描书）在 embedPage/save 时崩溃。
     var decodeStream = function (stream, encoding, params) {
+        if (stream && (stream.length === 0 || (stream.bytes && stream.bytes.length === 0))) {
+            return stream;
+        }
         if (encoding === PDFName.of('FlateDecode')) {
             return new FlateStream(stream);
         }
