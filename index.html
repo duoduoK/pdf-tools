@@ -39710,15 +39710,51 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:18px;
         padding:20px;box-shadow:0 10px 30px rgba(25,45,90,.07)}
   .label{font-size:13px;color:var(--sub);margin:0 0 11px;font-weight:700;letter-spacing:.4px}
-  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-  .mode{position:relative;border:1.5px solid var(--line);border-radius:14px;padding:16px 14px;
+  .modes{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}
+  .mode-group{margin:0;padding:10px;border-radius:16px}
+  .mode-group.g-blue{background:#f4f8ff;border:1px solid #e2ebff}
+  .mode-group.g-purple{background:#f9f6ff;border:1px solid #ece4fb}
+  .mode-group.g-green{background:#f5faf1;border:1px solid #e3f0d8}
+  .group-title{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.6px;padding:3px 11px;border-radius:999px;margin-bottom:11px}
+  .gt-blue{background:#eaf0ff;color:#3b6cff}
+  .gt-purple{background:#f1ecff;color:#7c5cff}
+  .gt-green{background:#eaf3e0;color:#16a34a}
+  /* 分组卡片浅色背景 */
+  .mode-group.g-blue   .mode{background:#f1f6ff;border-color:#dde7ff}
+  .mode-group.g-purple .mode{background:#f8f4ff;border-color:#ece4fb}
+  .mode-group.g-green  .mode{background:#f4faf0;border-color:#e0f0d6}
+  .mode-group.g-blue   .mode.on{border-color:#3b6cff;background:#e4edff;box-shadow:0 0 0 3px rgba(59,108,255,.13)}
+  .mode-group.g-purple .mode.on{border-color:#7c5cff;background:#ece4ff;box-shadow:0 0 0 3px rgba(124,92,255,.13)}
+  .mode-group.g-green  .mode.on{border-color:#16a34a;background:#e6f4db;box-shadow:0 0 0 3px rgba(22,163,74,.13)}
+  .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .mode-grid.single{display:block}
+  .mode-grid.single .mode{display:flex;align-items:center;gap:14px}
+  .mode-grid.single .mode .ic{font-size:24px}
+  .mode-grid.single .mode .t{margin:0 0 3px}
+  .mode-grid.single .mode .d{margin:0}
+  .work-layout{display:flex;gap:20px;align-items:flex-start}
+  .work-main{flex:1;min-width:0}
+  .stepper{flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:0;margin:0;padding:22px 6px;background:#f7faff;border:1px solid var(--line);border-radius:14px}
+  .step{display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--sub);font-size:11.5px;line-height:1.25;padding:20px 0}
+  .step .dot{width:28px;height:28px;border-radius:50%;background:#e6ebf3;color:#9aa3b2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid transparent;transition:.2s}
+  .step .st{white-space:nowrap}
+  .step.active{color:var(--pri);font-weight:700}
+  .step.active .dot{background:var(--accent);color:var(--pri);border-color:var(--pri)}
+  .step.done{color:var(--ok)}
+  .step.done .dot{background:var(--ok);color:#fff;border-color:var(--ok)}
+  .step.busy .dot{background:var(--pri);color:#fff;border-color:var(--pri);animation:steppulse 1s infinite}
+  .stepper .bar{width:2px;height:42px;background:#e6ebf3;margin:0}
+  .step.done + .bar{background:var(--ok)}
+  @keyframes steppulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.14);opacity:.85}}
+  @media(max-width:560px){.work-layout{flex-direction:column}.stepper{flex:0 0 auto;flex-direction:row;justify-content:center;gap:14px;padding:10px}.stepper .bar{width:16px;height:2px;margin:0}.step{flex-direction:row;padding:0}}
+  .mode{position:relative;border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;
         cursor:pointer;background:#fbfcfe;transition:.15s;user-select:none}
   .mode:hover{border-color:#c3d2f5}
   .mode.on{border-color:var(--pri);background:var(--accent);box-shadow:0 0 0 3px rgba(59,108,255,.12)}
-  .mode .ic{font-size:26px;line-height:1}
-  .mode .t{font-weight:700;font-size:15px;margin:8px 0 4px}
-  .mode .d{font-size:12.5px;color:var(--sub);line-height:1.5}
-  .mode .tick{position:absolute;top:10px;right:10px;font-size:13px;color:var(--pri);
+  .mode .ic{font-size:18px;line-height:1}
+  .mode .t{font-weight:700;font-size:13px;margin:5px 0 2px}
+  .mode .d{font-size:11px;color:var(--sub);line-height:1.4}
+  .mode .tick{position:absolute;top:7px;right:7px;font-size:11px;color:var(--pri);
               opacity:0;transition:.15s}
   .mode.on .tick{opacity:1}
   .drop{border:2px dashed #c8d3e8;border-radius:14px;padding:24px 16px;text-align:center;
@@ -39746,7 +39782,7 @@
   .banner{display:none;margin-bottom:14px;background:#fff7e6;border:1px solid #ffd591;
           color:#8a5a00;border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.6}
   .banner.show{display:block}
-  @media(max-width:430px){.modes{grid-template-columns:1fr}}
+  @media(max-width:430px){.mode-grid{grid-template-columns:1fr}}
   .row{display:flex;gap:12px;margin-bottom:6px}
   .row>*{flex:1}
   .sel{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fbfcfe;
@@ -39767,55 +39803,83 @@
 <div class="wrap">
   <header>
     <h1>📖 PDF 拼版工具</h1>
-    <p>省纸打印：把 PDF 拼成跨页，<b>双面打印</b>后对折即可。<br>两种模式任选，全程在本机完成。</p>
+    <p>省纸打印：把 PDF 拼成跨页，<b>双面打印</b>后对折即可。<br>7 个工具分 3 类，全程在本机完成。</p>
   </header>
 
   <div class="card">
     <div class="banner" id="banner"></div>
-
+    <div class="work-layout">
+    <div id="stepper" class="stepper">
+      <div class="step done" data-step="1"><span class="dot">1</span><span class="st">选工具</span></div>
+      <div class="bar"></div>
+      <div class="step" data-step="2"><span class="dot">2</span><span class="st">上传</span></div>
+      <div class="bar"></div>
+      <div class="step" data-step="3"><span class="dot">3</span><span class="st">设置</span></div>
+      <div class="bar"></div>
+      <div class="step" data-step="4"><span class="dot">4</span><span class="st">生成</span></div>
+    </div>
+    <div class="work-main">
     <p class="label">① 选择工具</p>
     <div class="modes" id="modes">
-      <div class="mode on" data-mode="fold">
-        <span class="tick">✓</span>
-        <div class="ic">📄</div>
-        <div class="t">一张一折</div>
-        <div class="d">每 4 页一个独立小节，每张纸各自对折叠放。</div>
+      <!-- 拼版折书 -->
+      <div class="mode-group g-blue">
+        <span class="group-title gt-blue">拼版折书</span>
+        <div class="mode-grid">
+          <div class="mode on" data-mode="fold">
+            <span class="tick">✓</span>
+            <div class="ic">📄</div>
+            <div class="t">一张一折</div>
+            <div class="d">每 4 页一个独立小节，各自对折。</div>
+          </div>
+          <div class="mode" data-mode="fold4">
+            <span class="tick">✓</span>
+            <div class="ic">📑</div>
+            <div class="t">四张一折</div>
+            <div class="d">4 张纸一起对折成 16 页大节。</div>
+          </div>
+          <div class="mode" data-mode="booklet">
+            <span class="tick">✓</span>
+            <div class="ic">📚</div>
+            <div class="t">整体对折（小册子）</div>
+            <div class="d">所有纸张嵌套，沿中缝订成整本。</div>
+          </div>
+        </div>
       </div>
-      <div class="mode" data-mode="fold4">
-        <span class="tick">✓</span>
-        <div class="ic">📑</div>
-        <div class="t">四张一折</div>
-        <div class="d">每 4 张纸一起对折成 16 页大节（节内骑马钉排版），多个大节叠放成书，省折纸次数。</div>
+      <!-- 书皮装帧 -->
+      <div class="mode-group g-purple">
+        <span class="group-title gt-purple">书皮装帧</span>
+        <div class="mode-grid single">
+          <div class="mode" data-mode="cover">
+            <span class="tick">✓</span>
+            <div class="ic">📔</div>
+            <div class="t">书皮</div>
+            <div class="d">上传封面/封底，自动出 PDF（含书脊）。</div>
+          </div>
+        </div>
       </div>
-      <div class="mode" data-mode="booklet">
-        <span class="tick">✓</span>
-        <div class="ic">📚</div>
-        <div class="t">整体对折（小册子）</div>
-        <div class="d">骑马钉装订：所有纸张嵌套、沿中缝装订成整本。</div>
-      </div>
-      <div class="mode" data-mode="cover">
-        <span class="tick">✓</span>
-        <div class="ic">📔</div>
-        <div class="t">书皮</div>
-        <div class="d">按内页尺寸上传封面/封底，自动出 PDF：单传→封面(或封底)+书脊，都传→拆两张 A4 打印。</div>
-      </div>
-      <div class="mode" data-mode="extract">
-        <span class="tick">✓</span>
-        <div class="ic">✂️</div>
-        <div class="t">提取</div>
-        <div class="d">按页码取单页，或一键导出首尾两页。</div>
-      </div>
-      <div class="mode" data-mode="a4tob5">
-        <span class="tick">✓</span>
-        <div class="ic">🗐</div>
-        <div class="t">A4 切小</div>
-        <div class="d">把 PDF 内容按所选内页尺寸（A5 / 小B5 / 大B5）放进 A4：可「居中裁四边」，或「顶格左右交替、双面只裁右边+下边两刀」。</div>
-      </div>
-      <div class="mode" data-mode="editpdf">
-        <span class="tick">✓</span>
-        <div class="ic">🧩</div>
-        <div class="t">增删PDF</div>
-        <div class="d">在原始 PDF 上批量增加、删减、替换页面，三种处理可一次同时完成。</div>
+      <!-- 页面工具 -->
+      <div class="mode-group g-green">
+        <span class="group-title gt-green">页面工具</span>
+        <div class="mode-grid">
+          <div class="mode" data-mode="extract">
+            <span class="tick">✓</span>
+            <div class="ic">✂️</div>
+            <div class="t">提取</div>
+            <div class="d">按页码取单页，或导出首尾两页。</div>
+          </div>
+          <div class="mode" data-mode="a4tob5">
+            <span class="tick">✓</span>
+            <div class="ic">🗐</div>
+            <div class="t">A4 切小</div>
+            <div class="d">把内容按内页尺寸放进 A4 打印。</div>
+          </div>
+          <div class="mode" data-mode="editpdf">
+            <span class="tick">✓</span>
+            <div class="ic">🧩</div>
+            <div class="t">增删PDF</div>
+            <div class="d">批量增、删、替换页面。</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -40111,6 +40175,46 @@ const fileEl  = document.getElementById('f');
 const nameEl  = document.getElementById('fname');
 const btnEl   = document.getElementById('b');
 const msgEl   = document.getElementById('msg');
+const activeToolEl = document.getElementById('activeTool');
+const stepperEl    = document.getElementById('stepper');
+let genState = 'idle';
+const TOOL_META = {
+  fold:    {ic:'📄', name:'一张一折', d:'每 4 页一个独立小节，各自对折。'},
+  fold4:   {ic:'📑', name:'四张一折', d:'4 张纸一起对折成 16 页大节。'},
+  booklet: {ic:'📚', name:'整体对折（小册子）', d:'所有纸张嵌套，沿中缝订成整本。'},
+  cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。'},
+  extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。'},
+  a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。'},
+  editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。'}
+};
+function setActiveTool(mode){
+  const m = TOOL_META[mode]; if (!m || !activeToolEl) return;
+  activeToolEl.querySelector('.at-ic').textContent = m.ic;
+  activeToolEl.querySelector('.at-name').textContent = m.name;
+  activeToolEl.querySelector('.at-desc').textContent = m.d;
+}
+function setStep(el, state){
+  if (!el) return;
+  el.classList.remove('todo','active','done','busy');
+  el.classList.add(state);
+}
+function updateStepper(){
+  if (!stepperEl) return;
+  const upDone = (current === 'cover') ? !!(coverFile || backFile) : !!fileObj;
+  const steps = stepperEl.querySelectorAll('.step');
+  if (steps.length < 4) return;
+  setStep(steps[0], 'done');
+  setStep(steps[1], upDone ? 'done' : 'active');
+  setStep(steps[2], upDone ? 'done' : 'todo');
+  if (genState === 'busy')      setStep(steps[3], 'busy');
+  else if (genState === 'done') setStep(steps[3], 'done');
+  else                          setStep(steps[3], upDone ? 'active' : 'todo');
+}
+function afterGen(){
+  genState = 'done'; updateStepper();
+  setTimeout(() => { if (genState === 'done'){ genState = 'idle'; updateStepper(); } }, 5000);
+}
+setActiveTool(current); updateStepper();
 
 const sizeSel    = document.getElementById('sizeSel');
 const orientSeg  = document.getElementById('orientSeg');
@@ -40224,6 +40328,8 @@ function showMode(mode){
   if (isExtract && fileObj) showPageCount(fileObj);
   if (isCover){ syncCoverPaper(); checkPaper(); }
   refreshBtn();
+  setActiveTool(mode);
+  updateStepper();
 }
 function refreshBtn(){
   if (current === 'cover') btnEl.disabled = !(coverFile || backFile);
@@ -40243,6 +40349,7 @@ function pick(f){
     msgEl.textContent = '请选择 PDF 文件'; return;
   }
   fileObj = f;
+  updateStepper();
   nameEl.textContent = '已选择：' + f.name + '（' + (f.size/1024/1024).toFixed(2) + ' MB）';
   btnEl.disabled = false;
   msgEl.textContent = '';
@@ -40375,6 +40482,7 @@ function pickCover(which, f){
   syncCoverPaper();
   refreshBtn();
   checkPaper();
+  updateStepper();
 }
 function clearCover(which){
   if (which === 'cover'){
@@ -40386,6 +40494,7 @@ function clearCover(which){
   }
   refreshBtn();
   checkPaper();
+  updateStepper();
 }
 dropCover.onclick = () => coverFEl.click();
 dropBack.onclick  = () => backFEl.click();
@@ -41016,11 +41125,12 @@ btnEl.onclick = async () => {
     msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
     return;
   }
-  if (current === 'editpdf'){ await editpdfGenerate(); return; }
-  if (current === 'extract'){ await extractGenerate(); return; }
-  if (current === 'cover'){ await coverGenerate(); return; }
-  if (current === 'a4tob5'){ await a4tob5Generate(); return; }
-  if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  genState = 'busy'; updateStepper();
+  if (current === 'editpdf'){ await editpdfGenerate(); afterGen(); return; }
+  if (current === 'extract'){ await extractGenerate(); afterGen(); return; }
+  if (current === 'cover'){ await coverGenerate(); afterGen(); return; }
+  if (current === 'a4tob5'){ await a4tob5Generate(); afterGen(); return; }
+  if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; genState = 'idle'; updateStepper(); return; }
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
   try {
@@ -41095,6 +41205,7 @@ btnEl.onclick = async () => {
     msgEl.textContent = '出错了：' + e;
   } finally {
     btnEl.disabled = false;
+    afterGen();
   }
 };
 </script>
