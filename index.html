@@ -39726,11 +39726,11 @@
   .mode-group.g-blue   .mode.on{border-color:#3b6cff;background:#e4edff;box-shadow:0 0 0 3px rgba(59,108,255,.13)}
   .mode-group.g-purple .mode.on{border-color:#7c5cff;background:#ece4ff;box-shadow:0 0 0 3px rgba(124,92,255,.13)}
   .mode-group.g-green  .mode.on{border-color:#16a34a;background:#e6f4db;box-shadow:0 0 0 3px rgba(22,163,74,.13)}
-  .mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  .mode-grid.single{display:block}
-  .mode-grid.single .mode{display:flex;align-items:center;gap:14px}
-  .mode-grid.single .mode .ic{font-size:24px}
-  .mode-grid.single .mode .t{margin:0 0 3px}
+  .mode-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-start}
+  .mode-grid.single{display:flex;flex-wrap:wrap;gap:10px}
+  .mode-grid.single .mode{display:flex}
+  .mode-grid.single .mode .ic{font-size:26px}
+  .mode-grid.single .mode .t{margin:0}
   .mode-grid.single .mode .d{margin:0}
   .work-layout{display:flex;gap:20px;align-items:flex-start}
   .work-main{flex:1;min-width:0}
@@ -39747,13 +39747,17 @@
   .step.done + .bar{background:var(--ok)}
   @keyframes steppulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.14);opacity:.85}}
   @media(max-width:560px){.work-layout{gap:10px}.stepper{flex:0 0 62px;padding:16px 4px}.step{padding:15px 0}.step .dot{width:25px;height:25px;font-size:12px}.step .st{font-size:10.5px}.stepper .bar{height:34px}}
-  .mode{position:relative;border:1.5px solid var(--line);border-radius:11px;padding:9px 10px;
-        cursor:pointer;background:#fbfcfe;transition:.15s;user-select:none}
+  .mode{position:relative;width:74px;aspect-ratio:1/1;border:1.5px solid var(--line);border-radius:14px;
+        display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:6px;
+        cursor:pointer;background:#fbfcfe;transition:.15s;user-select:none;text-align:center}
   .mode:hover{border-color:#c3d2f5}
   .mode.on{border-color:var(--pri);background:var(--accent);box-shadow:0 0 0 3px rgba(59,108,255,.12)}
-  .mode .ic{font-size:18px;line-height:1}
-  .mode .t{font-weight:700;font-size:13px;margin:5px 0 2px}
-  .mode .d{font-size:11px;color:var(--sub);line-height:1.4}
+  .mode .ic{font-size:26px;line-height:1}
+  .mode .t{font-weight:700;font-size:12px;margin:0;line-height:1.2}
+  .mode .d{display:none}
+  .mode-intro{margin-top:11px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.82);
+              font-size:12.5px;color:var(--sub);line-height:1.7;white-space:pre-line}
+  .mode-intro[hidden]{display:none}
   .mode .tick{position:absolute;top:7px;right:7px;font-size:11px;color:var(--pri);
               opacity:0;transition:.15s}
   .mode.on .tick{opacity:1}
@@ -40179,13 +40183,13 @@ const activeToolEl = document.getElementById('activeTool');
 const stepperEl    = document.getElementById('stepper');
 let genState = 'idle';
 const TOOL_META = {
-  fold:    {ic:'📄', name:'一张一折', d:'每 4 页一个独立小节，各自对折。'},
-  fold4:   {ic:'📑', name:'四张一折', d:'4 张纸一起对折成 16 页大节。'},
-  booklet: {ic:'📚', name:'整体对折（小册子）', d:'所有纸张嵌套，沿中缝订成整本。'},
-  cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。'},
-  extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。'},
-  a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。'},
-  editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。'}
+  fold:    {ic:'📄', name:'一张一折', d:'每 4 页一个独立小节，各自对折。', intro:'一张一折：每 4 页裁成一个独立小节，各自单独对折，适合把长文档拆成多本小册子分别装订。'},
+  fold4:   {ic:'📑', name:'四张一折', d:'4 张纸一起对折成 16 页大节。', intro:'四张一折：4 张纸叠在一起对折，组成 16 页的一个大节，折痕更厚、翻页更挺。'},
+  booklet: {ic:'📚', name:'整体对折（小册子）', d:'所有纸张嵌套，沿中缝订成整本。', intro:'整体对折（小册子）：所有纸张按页码嵌套后沿中缝对折，钉在一起就是一整本小册子。'},
+  cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。', intro:'书皮：上传封面、封底图片，自动拼成含书脊的成品书皮 PDF，可直接送印。'},
+  extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
+  a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
+  editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'}
 };
 function setActiveTool(mode){
   const m = TOOL_META[mode]; if (!m || !activeToolEl) return;
@@ -40299,6 +40303,20 @@ let a4tob5PlaceMode = 'edge';
 let a4tob5ScaleK66 = false;
 let filePages = 0;
 
+// 类别大框下的简介面板：选中工具后在该类别区域展示简介
+document.querySelectorAll('.mode-group').forEach(g => {
+  const d = document.createElement('div');
+  d.className = 'mode-intro'; d.hidden = true;
+  g.appendChild(d); g._intro = d;
+});
+function showIntro(mode){
+  const sel = modesEl.querySelector('.mode[data-mode="'+mode+'"]');
+  const grp = sel ? sel.closest('.mode-group') : null;
+  document.querySelectorAll('.mode-group').forEach(g => { g._intro.hidden = true; });
+  const m = TOOL_META[mode];
+  if (grp && grp._intro && m){ grp._intro.textContent = m.intro || m.d; grp._intro.hidden = false; }
+}
+showIntro(current);
 // 模式卡片切换（按钮文案始终为“生成新 PDF”）
 modesEl.querySelectorAll('.mode').forEach(el => {
   el.onclick = () => {
@@ -40329,6 +40347,7 @@ function showMode(mode){
   if (isCover){ syncCoverPaper(); checkPaper(); }
   refreshBtn();
   setActiveTool(mode);
+  showIntro(mode);
   updateStepper();
 }
 function refreshBtn(){
