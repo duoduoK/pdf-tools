@@ -39732,10 +39732,11 @@
   .mode-grid.single .mode .ic{font-size:26px}
   .mode-grid.single .mode .t{margin:0}
   .mode-grid.single .mode .d{margin:0}
-  .work-layout{display:flex;gap:20px;align-items:flex-start}
+  .work-layout{display:flex;gap:20px;align-items:stretch}
   .work-main{flex:1;min-width:0}
-  .stepper{flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:0;margin:0;padding:22px 6px;background:#f7faff;border:1px solid var(--line);border-radius:14px}
-  .step{display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--sub);font-size:11.5px;line-height:1.25;padding:20px 0}
+  .stepper{position:relative;flex:0 0 76px;margin:0;padding:8px 4px;background:#f7faff;border:1px solid var(--line);border-radius:14px}
+  .stepper::before{content:'';position:absolute;left:50%;top:18px;bottom:18px;width:2px;background:#e6ebf3;transform:translateX(-50%);z-index:0}
+  .step{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--sub);font-size:11.5px;line-height:1.2;transform:translateY(-50%);z-index:1}
   .step .dot{width:28px;height:28px;border-radius:50%;background:#e6ebf3;color:#9aa3b2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid transparent;transition:.2s}
   .step .st{white-space:nowrap}
   .step.active{color:var(--pri);font-weight:700}
@@ -39743,10 +39744,10 @@
   .step.done{color:var(--ok)}
   .step.done .dot{background:var(--ok);color:#fff;border-color:var(--ok)}
   .step.busy .dot{background:var(--pri);color:#fff;border-color:var(--pri);animation:steppulse 1s infinite}
-  .stepper .bar{width:2px;height:42px;background:#e6ebf3;margin:0}
+  .stepper .bar{display:none}
   .step.done + .bar{background:var(--ok)}
   @keyframes steppulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.14);opacity:.85}}
-  @media(max-width:560px){.work-layout{gap:10px}.stepper{flex:0 0 62px;padding:16px 4px}.step{padding:15px 0}.step .dot{width:25px;height:25px;font-size:12px}.step .st{font-size:10.5px}.stepper .bar{height:34px}}
+  @media(max-width:560px){.work-layout{gap:8px}.stepper{flex:0 0 30px;padding:6px 2px}.stepper::before{top:14px;bottom:14px}.step .dot{width:22px;height:22px;font-size:11px}.step .st{display:none}.step{gap:0}.mode-grid:not(.single){display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.mode-grid:not(.single) .mode{width:auto;aspect-ratio:1}}
   .mode{position:relative;width:74px;aspect-ratio:1/1;border:1.5px solid var(--line);border-radius:14px;
         display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:6px;
         cursor:pointer;background:#fbfcfe;transition:.15s;user-select:none;text-align:center}
@@ -39786,7 +39787,7 @@
   .banner{display:none;margin-bottom:14px;background:#fff7e6;border:1px solid #ffd591;
           color:#8a5a00;border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.6}
   .banner.show{display:block}
-  @media(max-width:430px){.mode-grid{grid-template-columns:1fr}}
+  @media(max-width:430px){.mode-grid:not(.single) .mode .t{font-size:11px}}
   .row{display:flex;gap:12px;margin-bottom:6px}
   .row>*{flex:1}
   .sel{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:12px;background:#fbfcfe;
@@ -40214,11 +40215,31 @@ function updateStepper(){
   else if (genState === 'done') setStep(steps[3], 'done');
   else                          setStep(steps[3], upDone ? 'active' : 'todo');
 }
+function alignSteps(){
+  if (!stepperEl) return;
+  const steps = stepperEl.querySelectorAll('.step');
+  if (steps.length < 4) return;
+  const railRect = stepperEl.getBoundingClientRect();
+  const centerOf = el => { if (!el) return null; const r = el.getBoundingClientRect(); return (r.top + r.height/2) - railRect.top; };
+  const m = document.getElementById('modes');
+  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock].find(b => b && !b.hidden) || pdfBlock;
+  const labels = blk ? blk.querySelectorAll('.label') : [];
+  const tops = [
+    centerOf(m),
+    centerOf(labels[0] || blk),
+    centerOf(labels[1] || labels[0] || blk),
+    centerOf(btnEl)
+  ];
+  steps.forEach((st, i) => { const t = tops[i]; if (t != null) st.style.top = t + 'px'; });
+}
 function afterGen(){
   genState = 'done'; updateStepper();
   setTimeout(() => { if (genState === 'done'){ genState = 'idle'; updateStepper(); } }, 5000);
 }
 setActiveTool(current); updateStepper();
+requestAnimationFrame(alignSteps);
+window.addEventListener('resize', alignSteps);
+setTimeout(alignSteps, 120);
 
 const sizeSel    = document.getElementById('sizeSel');
 const orientSeg  = document.getElementById('orientSeg');
@@ -40349,6 +40370,7 @@ function showMode(mode){
   setActiveTool(mode);
   showIntro(mode);
   updateStepper();
+  requestAnimationFrame(alignSteps);
 }
 function refreshBtn(){
   if (current === 'cover') btnEl.disabled = !(coverFile || backFile);
@@ -40368,14 +40390,27 @@ function pick(f){
     msgEl.textContent = '请选择 PDF 文件'; return;
   }
   fileObj = f;
+  const mb = f.size/1024/1024;
   updateStepper();
-  nameEl.textContent = '已选择：' + f.name + '（' + (f.size/1024/1024).toFixed(2) + ' MB）';
+  nameEl.textContent = '已选择：' + f.name + '（' + mb.toFixed(2) + ' MB）';
   btnEl.disabled = false;
   msgEl.textContent = '';
-  if (current === 'extract') showPageCount(f);
+  const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+  if (mb > 150){
+    msgEl.textContent = (coarse
+      ? '⚠️ 文件约 ' + mb.toFixed(0) + ' MB 较大，手机浏览器可能因内存不足失败。建议：用电脑打开本页处理，或在桌面浏览器打开离线包 booklet_offline.zip。'
+      : '⚠️ 文件约 ' + mb.toFixed(0) + ' MB 较大，生成时页面会卡住数十秒～几分钟，请勿关闭页面。') + ' 仍可直接点「生成新 PDF」。';
+  }
+  if (current === 'extract'){
+    if (mb > 150) filePages = 0;            // 大文件不在导入时加载，避免卡死；生成时再读
+    else showPageCount(f);
+  }
   if (current === 'editpdf'){
-    loadPdf(f).then(s => { editpdfCountEl.textContent = '当前原文件共 ' + s.getPageCount() + ' 页（下方所有页码请按此范围填写）'; }).catch(()=>{});
-    syncAddBlank();
+    if (mb > 150){ editpdfCountEl.textContent = '当前原文件较大（' + mb.toFixed(0) + ' MB），将在生成时加载'; syncAddBlank(); }
+    else {
+      loadPdf(f).then(s => { editpdfCountEl.textContent = '当前原文件共 ' + s.getPageCount() + ' 页（下方所有页码请按此范围填写）'; }).catch(()=>{});
+      syncAddBlank();
+    }
   }
 }
 // 提取模式：读取并显示 PDF 总页数
@@ -41145,6 +41180,7 @@ btnEl.onclick = async () => {
     return;
   }
   genState = 'busy'; updateStepper();
+  msgEl.textContent = '处理中…（PDF 越大越慢，请稍候，勿关闭页面）';
   if (current === 'editpdf'){ await editpdfGenerate(); afterGen(); return; }
   if (current === 'extract'){ await extractGenerate(); afterGen(); return; }
   if (current === 'cover'){ await coverGenerate(); afterGen(); return; }
