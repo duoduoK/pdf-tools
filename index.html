@@ -39852,6 +39852,12 @@
             <div class="t">整体对折（小册子）</div>
             <div class="d">所有纸张嵌套，沿中缝订成整本。</div>
           </div>
+          <div class="mode" data-mode="unfold">
+            <span class="tick">✓</span>
+            <div class="ic">↩️</div>
+            <div class="t">折页复原</div>
+            <div class="d">把折好的拼版 PDF 还原成正常单页顺序。</div>
+          </div>
         </div>
       </div>
       <!-- 书皮装帧 -->
@@ -40046,6 +40052,18 @@
       </div>
     </div>
 
+    <!-- 折页复原 -->
+    <div id="unfoldBlock" hidden>
+      <p class="label">② 这份折页版是哪种折法？</p>
+      <div class="seg" id="unfoldSeg">
+        <div class="opt on" data-un="fold">一张一折（每张纸 4 页）</div>
+        <div class="opt" data-un="fold4">四张一折（每 4 张纸 16 页）</div>
+      </div>
+      <div class="fname" style="margin-top:12px;color:var(--sub);font-size:12.5px;line-height:1.6">
+        上传的必须是<b>折页拼版后的 PDF</b>（每一页 = 一张纸的一个面，横向排 2 个原始页）。工具会按对应折法<b>反向拆开、还原成原始单页顺序</b>，导出普通的 1 页 1 张 PDF。
+      </div>
+    </div>
+
     <!-- 书皮 -->
     <div id="coverBlock" hidden>
       <p class="label">② 内页纸张尺寸</p>
@@ -40220,7 +40238,8 @@ const TOOL_META = {
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
   a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
   editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'},
-  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的道林纸色，久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的道林纸色（默认 RGB 245,242,235）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'}
+  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的道林纸色，久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的道林纸色（默认 RGB 245,242,235）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'},
+  unfold:  {ic:'↩️', name:'折页复原', d:'把折好的拼版 PDF 还原成正常单页顺序。', intro:'折页复原：把「一张一折」或「四张一折」拼版后的 PDF 反向拆开，还原成原始的单页阅读顺序，导出普通的 1 页 1 张 PDF。'}
 };
 function setActiveTool(mode){
   const m = TOOL_META[mode]; if (!m || !activeToolEl) return;
@@ -40252,7 +40271,7 @@ function alignSteps(){
   const railRect = stepperEl.getBoundingClientRect();
   const centerOf = el => { if (!el) return null; const r = el.getBoundingClientRect(); return (r.top + r.height/2) - railRect.top; };
   const m = document.getElementById('modes');
-  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock].find(b => b && !b.hidden) || pdfBlock;
+  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock, unfoldBlock].find(b => b && !b.hidden) || pdfBlock;
   const labels = blk ? blk.querySelectorAll('.label') : [];
   const tops = [
     centerOf(m),
@@ -40337,6 +40356,9 @@ const dropAddEl       = document.getElementById('dropAdd');
 const eyecareBlock    = document.getElementById('eyecareBlock');
 const eyecareColorEl  = document.getElementById('eyecareColor');
 const eyecareHexEl    = document.getElementById('eyecareHex');
+// 折页复原
+const unfoldBlock     = document.getElementById('unfoldBlock');
+const unfoldSeg       = document.getElementById('unfoldSeg');
 // 增加：空白 PDF 相关
 const editpdfAddBlank      = document.getElementById('editpdfAddBlank');
 const editpdfAddBlankWrap  = document.getElementById('editpdfAddBlankWrap');
@@ -40366,6 +40388,16 @@ function updateEyecareHex(){
   eyecareHexEl.textContent = (v === 'f5f2eb' ? '道林纸 ' : '') + '#' + v.toUpperCase() + ' · RGB(' + r + ',' + g + ',' + b + ')';
 }
 if (eyecareColorEl) eyecareColorEl.addEventListener('input', updateEyecareHex);
+
+// 折页复原：折法选择
+let unfoldMode = 'fold';
+if (unfoldSeg) unfoldSeg.querySelectorAll('.opt').forEach(o => {
+  o.onclick = () => {
+    unfoldSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
+    o.classList.add('on');
+    unfoldMode = o.dataset.un;
+  };
+});
 
 // 类别大框下的简介面板：选中工具后在该类别区域展示简介
 document.querySelectorAll('.mode-group').forEach(g => {
@@ -40397,12 +40429,14 @@ function showMode(mode){
   const isA4tob5 = (mode === 'a4tob5');
   const isEditpdf = (mode === 'editpdf');
   const isEyecare = (mode === 'eyecare');
+  const isUnfold = (mode === 'unfold');
   pdfBlock.hidden    = isCover;
   coverBlock.hidden  = !isCover;
   a4tob5Block.hidden  = !isA4tob5;
   extractBlock.hidden = !isExtract;
   editpdfBlock.hidden = !isEditpdf;
   eyecareBlock.hidden = !isEyecare;
+  unfoldBlock.hidden  = !isUnfold;
   pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4');
   const splitWrapEl = document.getElementById('splitWrap');
   if (splitWrapEl) splitWrapEl.hidden = pdfHow.hidden;
@@ -40671,11 +40705,12 @@ async function safeEmbedPage(out, srcDoc, srcPage, transformationMatrix, bboxOve
   // 坐标为未旋转页面绝对坐标（与 CropBox 同一坐标系）。
   const cb = visibleBoxOf(srcPage);
   const bbox = bboxOverride || { left: cb.x, bottom: cb.y, right: cb.x + cb.width, top: cb.y + cb.height };
-  // FIX(2026-10-03): pdf-lib embedPage 的 BBox 只负责裁剪，不会把内容平移回原点。
-  // 当源页 CropBox 原点不是 (0,0)（如有些书把小页面放在 A3 大 MediaBox 中央）时，
-  // 内容会带着源页绝对坐标被 drawPage 画到目标页外，表现为内容缩小错位、大片空白。
-  // 此处先把 CropBox 偏移平移回原点，再叠加调用方给的变换矩阵（行向量复合 M = T·R）。
-  const T = [1, 0, 0, 1, -cb.x, -cb.y];
+  // pdf-lib embedPage 的 BBox 只负责裁剪，不会把内容平移回原点（见 PDFPageEmbedder：
+  // 只有不传矩阵时才用 boundingBoxAdjustedMatrix 平移）。所以我们要自己把「嵌入区域」的
+  // 左下角平移到 (0,0)：传了自定义矩阵时 pdf-lib 不会兜底，平移量必须取 bbox 原点，
+  // 而不是整页 cb 原点 —— 否则取子区域（半页/跨页拆分）时内容不居中、右半页会串成左半页。
+  // FIX(2026-10-13): T 由 -cb 改为 -bbox；整页嵌入时 bbox===cb，行为与旧版完全一致。
+  const T = [1, 0, 0, 1, -bbox.left, -bbox.bottom];
   const R = transformationMatrix || [1, 0, 0, 1, 0, 0];
   const mul = (A, B) => [
     A[0] * B[0] + A[1] * B[2],
@@ -41218,6 +41253,68 @@ async function editpdfGenerate(){
   }
 }
 
+// 折页复原：把折页拼版后的 PDF 反向拆回原始单页顺序。
+// 折页工具输出：每一页 = 一张纸的一个面，横向并排 2 个原始页（左 = 配对里的 L，右 = R）。
+// 复原 = 取出每页左/右半，按 pairsFor(mode, 2×张数) 的同一张配对表回填到原始页号。
+async function unfoldGenerate(){
+  if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  const src = await loadPdf(fileObj);
+  const S = src.getPageCount();
+  if (!S){ msgEl.textContent = '这个 PDF 没有可处理的页面'; return; }
+  const mode = (unfoldMode === 'fold4') ? 'fold4' : 'fold';
+  const total = S * 2;
+  const pairs = pairsFor(mode, total);
+
+  // 以第一页推算「原始单页」尺寸（折页版是横版页 → 左右各半）
+  const p0 = src.getPage(0);
+  const cb0 = visibleBoxOf(p0);
+  const rot0 = p0.getRotation().angle;
+  const swp0 = (rot0 === 90 || rot0 === 270);
+  const viewW = swp0 ? cb0.height : cb0.width;
+  const viewH = swp0 ? cb0.width  : cb0.height;
+  let warn = '';
+  if (viewW <= viewH * 1.02){
+    warn = '\n⚠️ 这份 PDF 的页面看起来是竖版（折页版通常为横版、2 个原始页并排）。仍已尝试还原，请核对结果。';
+  }
+  const W = viewW / 2;   // 原始单页宽
+  const H = viewH;       // 原始单页高
+
+  const out = await PDFDocument.create();
+  const slots = new Array(total + 1).fill(null);   // 1-based；缺位留空
+  for (let j = 1; j <= S; j++){
+    const pg = src.getPage(j - 1);
+    const cb = visibleBoxOf(pg);
+    const rot = pg.getRotation().angle;
+    const w = cb.width, h = cb.height;
+    const bm = bakeMatrix(rot, cb.width, cb.height);
+    // 视图左/右半 → 未旋转 CropBox 局部坐标区间（与折页/跨页拆分同一套映射）
+    let Lr, Rr;
+    if (rot === 90){       Lr = { x0:0, y0:h/2, x1:w, y1:h }; Rr = { x0:0, y0:0, x1:w, y1:h/2 }; }
+    else if (rot === 180){ Lr = { x0:w/2, y0:0, x1:w, y1:h }; Rr = { x0:0, y0:0, x1:w/2, y1:h }; }
+    else if (rot === 270){ Lr = { x0:0, y0:0, x1:w, y1:h/2 }; Rr = { x0:0, y0:h/2, x1:w, y1:h }; }
+    else {                 Lr = { x0:0, y0:0, x1:w/2, y1:h }; Rr = { x0:w/2, y0:0, x1:w, y1:h }; }
+    const bb = r => ({ left: cb.x + r.x0, bottom: cb.y + r.y0, right: cb.x + r.x1, top: cb.y + r.y1 });
+    const embL = await safeEmbedPage(out, src, pg, bm, bb(Lr));
+    const embR = await safeEmbedPage(out, src, pg, bm, bb(Rr));
+    const pr = pairs[j - 1];
+    if (pr){
+      if (pr[0] >= 1 && pr[0] <= total) slots[pr[0]] = embL;
+      if (pr[1] >= 1 && pr[1] <= total) slots[pr[1]] = embR;
+    }
+  }
+  for (let i = 1; i <= total; i++){
+    const page = out.addPage([W, H]);
+    const emb = slots[i];
+    if (emb) page.drawPage(emb, { x: 0, y: 0, width: W, height: H });
+  }
+
+  const outBytes = await out.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  const base = fileObj.name.replace(/\.pdf$/i, '');
+  doDownload(blob, base + '_复原.pdf');
+  msgEl.textContent = '✅ 已还原：' + S + ' 张折页 → ' + total + ' 个原始页，开始下载。' + warn;
+}
+
 // 假装护眼：把每页底色统一叠成指定纸色（Multiply 正片叠底）。
 // 原理：白 × 纸色 = 纸色，黑字 × 纸色 ≈ 黑字；文字/矢量/图片都不改动，
 // 只在整个页面上追加一层叠印矩形，所以对「文字版」与「图片/扫描版」PDF 都有效。
@@ -41284,6 +41381,7 @@ btnEl.onclick = async () => {
   if (current === 'cover'){ await coverGenerate(); afterGen(); return; }
   if (current === 'a4tob5'){ await a4tob5Generate(); afterGen(); return; }
   if (current === 'eyecare'){ await eyecareGenerate(); afterGen(); return; }
+  if (current === 'unfold'){ await unfoldGenerate(); afterGen(); return; }
   if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; genState = 'idle'; updateStepper(); return; }
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
