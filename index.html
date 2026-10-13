@@ -39715,17 +39715,21 @@
   .mode-group.g-blue{background:#f4f8ff;border:1px solid #e2ebff}
   .mode-group.g-purple{background:#f9f6ff;border:1px solid #ece4fb}
   .mode-group.g-green{background:#f5faf1;border:1px solid #e3f0d8}
+  .mode-group.g-amber{background:#fdf9f1;border:1px solid #f2e7d2}
   .group-title{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.6px;padding:3px 11px;border-radius:999px;margin-bottom:11px}
   .gt-blue{background:#eaf0ff;color:#3b6cff}
   .gt-purple{background:#f1ecff;color:#7c5cff}
   .gt-green{background:#eaf3e0;color:#16a34a}
+  .gt-amber{background:#f6eeda;color:#b5822a}
   /* 分组卡片浅色背景 */
   .mode-group.g-blue   .mode{background:#f1f6ff;border-color:#dde7ff}
   .mode-group.g-purple .mode{background:#f8f4ff;border-color:#ece4fb}
   .mode-group.g-green  .mode{background:#f4faf0;border-color:#e0f0d6}
+  .mode-group.g-amber  .mode{background:#fdfaf3;border-color:#f0e6d2}
   .mode-group.g-blue   .mode.on{border-color:#3b6cff;background:#e4edff;box-shadow:0 0 0 3px rgba(59,108,255,.13)}
   .mode-group.g-purple .mode.on{border-color:#7c5cff;background:#ece4ff;box-shadow:0 0 0 3px rgba(124,92,255,.13)}
   .mode-group.g-green  .mode.on{border-color:#16a34a;background:#e6f4db;box-shadow:0 0 0 3px rgba(22,163,74,.13)}
+  .mode-group.g-amber  .mode.on{border-color:#c08a2e;background:#f9f0dc;box-shadow:0 0 0 3px rgba(192,138,46,.15)}
   .mode-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-start}
   .mode-grid.single{display:flex;flex-wrap:wrap;gap:10px}
   .mode-grid.single .mode{display:flex}
@@ -39886,6 +39890,18 @@
           </div>
         </div>
       </div>
+      <!-- 阅读优化 -->
+      <div class="mode-group g-amber">
+        <span class="group-title gt-amber">阅读优化</span>
+        <div class="mode-grid single">
+          <div class="mode" data-mode="eyecare">
+            <span class="tick">✓</span>
+            <div class="ic">🌿</div>
+            <div class="t">假装护眼</div>
+            <div class="d">把页面白底换成柔和的道林纸色，久看不刺眼。</div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 拼版（一张一折 / 整体对折（小册子）） -->
@@ -40014,6 +40030,19 @@
 
       <div class="fname" style="margin-top:14px;color:var(--sub);font-weight:500;line-height:1.6">
         所有页码均指<b>原始文件</b>的页码；一次可同时执行增加 / 删减 / 替换。若某页同时被设删减与替换，以删减为准。
+      </div>
+    </div>
+
+    <!-- 假装护眼 -->
+    <div id="eyecareBlock" hidden>
+      <p class="label">② 底色</p>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <input type="color" id="eyecareColor" value="#f5f2eb"
+               style="width:52px;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer">
+        <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">道林纸 #F5F2EB · RGB(245,242,235)</span>
+      </div>
+      <div class="fname" style="margin-top:12px;color:var(--sub);font-size:12.5px;line-height:1.6">
+        把每页的底色统一叠成上面这个颜色（默认<b>道林纸色</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。
       </div>
     </div>
 
@@ -40167,7 +40196,7 @@ if (typeof PDFLib === 'undefined'){
   document.getElementById('msg').textContent = '拼版库未能加载，请刷新页面，或改用系统浏览器（华为浏览器 / Chrome）打开本页。';
 }
 
-const { PDFDocument, rgb, PDFName } = PDFLib;
+const { PDFDocument, rgb, PDFName, PDFDict, PDFArray, PDFRef } = PDFLib;
 let current = 'fold';
 let fileObj = null;
 let sizeVal = 'A4';
@@ -40190,7 +40219,8 @@ const TOOL_META = {
   cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。', intro:'书皮：上传封面、封底图片，自动拼成含书脊的成品书皮 PDF，可直接送印。'},
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
   a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
-  editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'}
+  editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'},
+  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的道林纸色，久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的道林纸色（默认 RGB 245,242,235）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'}
 };
 function setActiveTool(mode){
   const m = TOOL_META[mode]; if (!m || !activeToolEl) return;
@@ -40222,7 +40252,7 @@ function alignSteps(){
   const railRect = stepperEl.getBoundingClientRect();
   const centerOf = el => { if (!el) return null; const r = el.getBoundingClientRect(); return (r.top + r.height/2) - railRect.top; };
   const m = document.getElementById('modes');
-  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock].find(b => b && !b.hidden) || pdfBlock;
+  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock].find(b => b && !b.hidden) || pdfBlock;
   const labels = blk ? blk.querySelectorAll('.label') : [];
   const tops = [
     centerOf(m),
@@ -40303,6 +40333,10 @@ const editpdfAddPos   = document.getElementById('editpdfAddPos');
 const editpdfAddFile  = document.getElementById('editpdfAddFile');
 const editpdfAddName  = document.getElementById('editpdfAddName');
 const dropAddEl       = document.getElementById('dropAdd');
+// 假装护眼
+const eyecareBlock    = document.getElementById('eyecareBlock');
+const eyecareColorEl  = document.getElementById('eyecareColor');
+const eyecareHexEl    = document.getElementById('eyecareHex');
 // 增加：空白 PDF 相关
 const editpdfAddBlank      = document.getElementById('editpdfAddBlank');
 const editpdfAddBlankWrap  = document.getElementById('editpdfAddBlankWrap');
@@ -40323,6 +40357,15 @@ let a4tob5Size = 'small';
 let a4tob5PlaceMode = 'edge';
 let a4tob5ScaleK66 = false;
 let filePages = 0;
+
+// 假装护眼：底色取色框
+function updateEyecareHex(){
+  if (!eyecareHexEl || !eyecareColorEl) return;
+  const v = eyecareColorEl.value.toLowerCase().replace('#','');
+  const r = parseInt(v.slice(0,2),16), g = parseInt(v.slice(2,4),16), b = parseInt(v.slice(4,6),16);
+  eyecareHexEl.textContent = (v === 'f5f2eb' ? '道林纸 ' : '') + '#' + v.toUpperCase() + ' · RGB(' + r + ',' + g + ',' + b + ')';
+}
+if (eyecareColorEl) eyecareColorEl.addEventListener('input', updateEyecareHex);
 
 // 类别大框下的简介面板：选中工具后在该类别区域展示简介
 document.querySelectorAll('.mode-group').forEach(g => {
@@ -40353,11 +40396,13 @@ function showMode(mode){
   const isExtract = (mode === 'extract');
   const isA4tob5 = (mode === 'a4tob5');
   const isEditpdf = (mode === 'editpdf');
+  const isEyecare = (mode === 'eyecare');
   pdfBlock.hidden    = isCover;
   coverBlock.hidden  = !isCover;
   a4tob5Block.hidden  = !isA4tob5;
   extractBlock.hidden = !isExtract;
   editpdfBlock.hidden = !isEditpdf;
+  eyecareBlock.hidden = !isEyecare;
   pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4');
   const splitWrapEl = document.getElementById('splitWrap');
   if (splitWrapEl) splitWrapEl.hidden = pdfHow.hidden;
@@ -41173,6 +41218,59 @@ async function editpdfGenerate(){
   }
 }
 
+// 假装护眼：把每页底色统一叠成指定纸色（Multiply 正片叠底）。
+// 原理：白 × 纸色 = 纸色，黑字 × 纸色 ≈ 黑字；文字/矢量/图片都不改动，
+// 只在整个页面上追加一层叠印矩形，所以对「文字版」与「图片/扫描版」PDF 都有效。
+async function eyecareGenerate(){
+  if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  const src = await loadPdf(fileObj);
+  const pages = src.getPages();
+  if (!pages.length){ msgEl.textContent = '这个 PDF 没有可处理的页面'; return; }
+
+  // 解析目标纸色（0~1）
+  const hv = (eyecareColorEl && eyecareColorEl.value ? eyecareColorEl.value : '#f5f2eb').replace('#','');
+  const cr = parseInt(hv.slice(0,2),16)/255, cg = parseInt(hv.slice(2,4),16)/255, cb = parseInt(hv.slice(4,6),16)/255;
+
+  // 全文档共用一个 ExtGState（BM=Multiply），避免每页重复对象
+  const gs = src.context.obj({});
+  gs.set(PDFName.of('Type'), PDFName.of('ExtGState'));
+  gs.set(PDFName.of('BM'), PDFName.of('Multiply'));
+  gs.set(PDFName.of('ca'), src.context.obj(1));
+  gs.set(PDFName.of('CA'), src.context.obj(1));
+  const gsRef = src.context.register(gs);
+
+  let done = 0;
+  for (const page of pages){
+    const mb = page.getMediaBox();
+    // 盖住整个 MediaBox（比 CropBox 大，保证可见区全覆盖；矩形随页面一起旋转）
+    const cs = 'q\n/MO gs\n' + cr.toFixed(4) + ' ' + cg.toFixed(4) + ' ' + cb.toFixed(4) + ' rg\n'
+             + mb.x.toFixed(3) + ' ' + mb.y.toFixed(3) + ' ' + mb.width.toFixed(3) + ' ' + mb.height.toFixed(3) + ' re f\nQ\n';
+    // 把 ExtGState 注册进本页资源（Resources 可能被多页共用，存在即复用）
+    const res = page.node.Resources();
+    const eg = res.lookup(PDFName.of('ExtGState'));
+    if (eg instanceof PDFDict){ eg.set(PDFName.of('MO'), gsRef); }
+    else { const d = src.context.obj({}); d.set(PDFName.of('MO'), gsRef); res.set(PDFName.of('ExtGState'), src.context.register(d)); }
+    // 追加到 Contents 末尾（盖在所有内容之上）
+    const ref = src.context.register(src.context.flateStream(cs));
+    const cur = page.node.get(PDFName.of('Contents'));
+    const list = [];
+    if (cur){
+      const resolved = (cur instanceof PDFRef) ? src.context.lookup(cur) : cur;
+      if (resolved instanceof PDFArray) list.push(...resolved.asArray());
+      else list.push(cur);
+    }
+    list.push(ref);
+    page.node.set(PDFName.of('Contents'), src.context.obj(list));
+    done++;
+  }
+
+  const outBytes = await src.save();
+  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  const base = fileObj.name.replace(/\.pdf$/i, '');
+  doDownload(blob, base + '_护眼.pdf');
+  msgEl.textContent = '✅ 已完成：' + done + ' 页底色叠成 #' + hv.toUpperCase() + '，开始下载。';
+}
+
 btnEl.onclick = async () => {
   // 仅鸿蒙系统的微信/QQ 内置浏览器拦截下载，避免“暂无可用打开方式”死路；其他系统照常
   if (isHarmonyOS && (inWeChat || inQQ)){
@@ -41185,6 +41283,7 @@ btnEl.onclick = async () => {
   if (current === 'extract'){ await extractGenerate(); afterGen(); return; }
   if (current === 'cover'){ await coverGenerate(); afterGen(); return; }
   if (current === 'a4tob5'){ await a4tob5Generate(); afterGen(); return; }
+  if (current === 'eyecare'){ await eyecareGenerate(); afterGen(); return; }
   if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; genState = 'idle'; updateStepper(); return; }
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
