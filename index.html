@@ -39918,7 +39918,7 @@
             <span class="tick">✓</span>
             <div class="ic">🌿</div>
             <div class="t">假装护眼</div>
-            <div class="d">把页面白底换成柔和的道林纸色，久看不刺眼。</div>
+            <div class="d">把页面白底换成柔和的护眼纸色（米白道林/教材色/国产道林/自选），久看不刺眼。</div>
           </div>
         </div>
       </div>
@@ -40054,15 +40054,27 @@
     </div>
 
     <!-- 假装护眼 -->
+    <style>
+      #eyecarePresets .ecchip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font:600 13px/1.2 system-ui,sans-serif;color:var(--txt);transition:border-color .15s,box-shadow .15s,transform .08s}
+      #eyecarePresets .ecchip:active{transform:translateY(1px)}
+      #eyecarePresets .ecchip.on{border-color:var(--pri);box-shadow:0 0 0 3px rgba(59,108,255,.18)}
+      #eyecarePresets .ecsw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.15);background:var(--c,#eee);flex:0 0 auto}
+    </style>
     <div id="eyecareBlock" hidden>
-      <p class="label">② 底色</p>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <input type="color" id="eyecareColor" value="#f5f2eb"
+      <p class="label">② 选一种护眼底色</p>
+      <div id="eyecarePresets" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" class="ecchip on" data-hex="#F9F3E5" style="--c:#F9F3E5"><span class="ecsw"></span><span class="ect">米白道林</span></button>
+        <button type="button" class="ecchip" data-hex="#F7EED6" style="--c:#F7EED6"><span class="ecsw"></span><span class="ect">教材常用</span></button>
+        <button type="button" class="ecchip" data-hex="#F5EBCE" style="--c:#F5EBCE"><span class="ecsw"></span><span class="ect">国产道林</span></button>
+        <button type="button" class="ecchip ec-custom" id="eyecareCustomChip" style="--c:conic-gradient(from 0deg,red,orange,#ff0,lime,aqua,blue,magenta,red)"><span class="ecsw" id="eyecareCustomSw"></span><span class="ect">自选颜色</span></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <input type="color" id="eyecareColor" value="#f9f3e5"
                style="width:52px;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer">
-        <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">道林纸 #F5F2EB · RGB(245,242,235)</span>
+        <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">米白道林 #F9F3E5 · RGB(249,243,229)</span>
       </div>
       <div class="fname" style="margin-top:12px;color:var(--sub);font-size:12.5px;line-height:1.6">
-        把每页的底色统一叠成上面这个颜色（默认<b>道林纸色</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。
+        把每页的底色统一叠成上面这个颜色（默认<b>米白道林</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。
       </div>
     </div>
 
@@ -40252,7 +40264,7 @@ const TOOL_META = {
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
   a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
   editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'},
-  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的道林纸色，久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的道林纸色（默认 RGB 245,242,235）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'},
+  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的护眼纸色（米白道林/教材色/国产道林/自选），久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的护眼纸色（预设 米白道林 RGB 249,243,229 / 教材常用 RGB 247,238,214 / 国产道林 RGB 245,235,206，也可自选任意颜色）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'},
   unfold:  {ic:'↩️', name:'折页复原', d:'把折好的拼版 PDF 还原成正常单页顺序。', intro:'折页复原：把「一张一折」或「四张一折」拼版后的 PDF 反向拆开，还原成原始的单页阅读顺序，导出普通的 1 页 1 张 PDF。'}
 };
 function setActiveTool(mode){
@@ -40370,6 +40382,11 @@ const dropAddEl       = document.getElementById('dropAdd');
 const eyecareBlock    = document.getElementById('eyecareBlock');
 const eyecareColorEl  = document.getElementById('eyecareColor');
 const eyecareHexEl    = document.getElementById('eyecareHex');
+const eyecarePresets  = document.getElementById('eyecarePresets');
+const eyecareCustomChip = document.getElementById('eyecareCustomChip');
+const eyecareCustomSw   = document.getElementById('eyecareCustomSw');
+// 护眼底色预设（hex 小写 → 名称）
+const EC_PRESETS = { 'f9f3e5':'米白道林', 'f7eed6':'教材常用', 'f5ebce':'国产道林' };
 // 折页复原
 const unfoldBlock     = document.getElementById('unfoldBlock');
 const unfoldSeg       = document.getElementById('unfoldSeg');
@@ -40394,13 +40411,34 @@ let a4tob5PlaceMode = 'edge';
 let a4tob5ScaleK66 = false;
 let filePages = 0;
 
-// 假装护眼：底色取色框
+// 假装护眼：底色选择（预设色卡 + 自选）
+function setEyecareActive(hex){
+  if (!eyecarePresets) return;
+  const key = hex.toLowerCase().replace('#','');
+  const isPreset = !!EC_PRESETS[key];
+  eyecarePresets.querySelectorAll('.ecchip').forEach(c => {
+    const match = c.dataset.hex && c.dataset.hex.toLowerCase() === hex.toLowerCase();
+    c.classList.toggle('on', !!match);
+  });
+  if (!isPreset && eyecareCustomChip) eyecareCustomChip.classList.add('on');
+}
 function updateEyecareHex(){
   if (!eyecareHexEl || !eyecareColorEl) return;
   const v = eyecareColorEl.value.toLowerCase().replace('#','');
   const r = parseInt(v.slice(0,2),16), g = parseInt(v.slice(2,4),16), b = parseInt(v.slice(4,6),16);
-  eyecareHexEl.textContent = (v === 'f5f2eb' ? '道林纸 ' : '') + '#' + v.toUpperCase() + ' · RGB(' + r + ',' + g + ',' + b + ')';
+  const name = EC_PRESETS[v] || '自选';
+  eyecareHexEl.textContent = name + ' #' + v.toUpperCase() + ' · RGB(' + r + ',' + g + ',' + b + ')';
+  setEyecareActive(v);
+  if (eyecareCustomSw) eyecareCustomSw.style.background = '#' + v;
 }
+// 点预设色卡 → 写入取色框并刷新；点「自选颜色」→ 直接调起系统取色器
+if (eyecarePresets) eyecarePresets.querySelectorAll('.ecchip').forEach(c => {
+  c.addEventListener('click', () => {
+    if (c.id === 'eyecareCustomChip'){ if (eyecareColorEl) eyecareColorEl.click(); return; }
+    if (eyecareColorEl) eyecareColorEl.value = c.dataset.hex;
+    updateEyecareHex();
+  });
+});
 if (eyecareColorEl) eyecareColorEl.addEventListener('input', updateEyecareHex);
 
 // 折页复原：折法选择
@@ -41339,7 +41377,7 @@ async function eyecareGenerate(){
   if (!pages.length){ msgEl.textContent = '这个 PDF 没有可处理的页面'; return; }
 
   // 解析目标纸色（0~1）
-  const hv = (eyecareColorEl && eyecareColorEl.value ? eyecareColorEl.value : '#f5f2eb').replace('#','');
+  const hv = (eyecareColorEl && eyecareColorEl.value ? eyecareColorEl.value : '#f9f3e5').replace('#','');
   const cr = parseInt(hv.slice(0,2),16)/255, cg = parseInt(hv.slice(2,4),16)/255, cb = parseInt(hv.slice(4,6),16)/255;
 
   // 全文档共用一个 ExtGState（BM=Multiply），避免每页重复对象
