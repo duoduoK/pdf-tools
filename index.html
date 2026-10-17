@@ -39733,6 +39733,7 @@
   /* 统一一行 4 个：所有分组都用 4 列网格对齐 */
   .mode-grid{display:grid;grid-template-columns:repeat(4,74px);gap:10px;justify-content:start}
   .mode-grid.single{display:grid;grid-template-columns:repeat(4,74px);gap:10px;justify-content:start}
+  .mode-grid.grid3{grid-template-columns:repeat(3,74px)}
   .work-layout{display:flex;gap:20px;align-items:stretch}
   .work-main{flex:1;min-width:0}
   .stepper{position:relative;flex:0 0 76px;margin:0;padding:8px 4px;background:#f7faff;border:1px solid var(--line);border-radius:14px}
@@ -39757,6 +39758,7 @@
     .step{gap:0}
     /* 手机：一行 4 个（卡片本身的尺寸覆盖放在基础 .mode 规则之后，见下方第二个媒体块） */
     .mode-grid,.mode-grid.single{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+    .mode-grid.grid3{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
     .mode-group{padding:8px}
   }
   .mode{position:relative;width:74px;aspect-ratio:1/1;border:1.5px solid var(--line);border-radius:14px;
@@ -39847,7 +39849,7 @@
       <!-- 拼版折书 -->
       <div class="mode-group g-blue">
         <span class="group-title gt-blue">拼版折书</span>
-        <div class="mode-grid">
+        <div class="mode-grid grid3">
           <div class="mode on" data-mode="fold">
             <span class="tick">✓</span>
             <div class="ic">📄</div>
@@ -39859,6 +39861,12 @@
             <div class="ic">📑</div>
             <div class="t">四张一折</div>
             <div class="d">4 张纸一起对折成 16 页大节。</div>
+          </div>
+          <div class="mode" data-mode="fold6">
+            <span class="tick">✓</span>
+            <div class="ic">📒</div>
+            <div class="t">六张一折</div>
+            <div class="d">6 张纸一起对折成 24 页大节。</div>
           </div>
           <div class="mode" data-mode="booklet">
             <span class="tick">✓</span>
@@ -39935,8 +39943,7 @@
       </div>
       <label id="splitWrap" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer;font-size:13px;line-height:1.55">
         <input type="checkbox" id="splitSpreads" checked style="margin-top:3px;flex:none">
-        <span><b>跨页版自动拆分</b> —— 源 PDF 里<b>横版页</b>（宽&gt;高，即左右两书页拼成的跨页，如微信下载的漫画跨页版）自动按中线拆成左右两页再拼版；竖版页保持整页。<br>
-        拆分后：每张输出 PDF 页 = 2 个书页，双面打印 1 张纸 = 4 个书页，对折即成 4 页小节。若原书本身就是横版单页（不是跨页），请取消勾选。</span>
+        <span><b>跨页版自动拆分</b>：横版页（左右两页拼成的跨页）按中线拆成左右两页，竖版页保持整页。若原书本身是横版单页（非跨页），请取消勾选。</span>
       </label>
     </div>
 
@@ -40175,7 +40182,8 @@
       2. <b>双面打印</b>下载的文件（每 2 个输出页 = 1 张纸正反面）；<br>
       3. 一张一折：每张纸沿中线对折、按序叠放；<br>
       4. 四张一折：每 4 张纸叠齐、沿中线一起对折成 16 页大节，大节按序叠放成书（省折纸次数）；<br>
-      5. 整体对折（小册子）：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
+      5. 六张一折：每 6 张纸叠齐、沿中线一起对折成 24 页大节，比四张一折更厚更紧凑（页数多时更省折纸次数）；<br>
+      6. 整体对折（小册子）：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
       <span style="color:#9aa3b2">提示：若点击后无法下载，请用系统浏览器（华为浏览器 / Chrome）打开本页，不要用微信/QQ 内置浏览器。</span>
     </div>
     <div class="how" id="coverHow" hidden>
@@ -40259,6 +40267,7 @@ let genState = 'idle';
 const TOOL_META = {
   fold:    {ic:'📄', name:'一张一折', d:'每 4 页一个独立小节，各自对折。', intro:'一张一折：每 4 页裁成一个独立小节，各自单独对折，适合把长文档拆成多本小册子分别装订。'},
   fold4:   {ic:'📑', name:'四张一折', d:'4 张纸一起对折成 16 页大节。', intro:'四张一折：4 张纸叠在一起对折，组成 16 页的一个大节，折痕更厚、翻页更挺。'},
+  fold6:   {ic:'📒', name:'六张一折', d:'6 张纸一起对折成 24 页大节。', intro:'六张一折：6 张纸叠在一起对折，组成 24 页的一个大节，比四张一折折痕更厚、整本更紧凑，适合页数较多时一次折一大本。'},
   booklet: {ic:'📚', name:'整体对折（小册子）', d:'所有纸张嵌套，沿中缝订成整本。', intro:'整体对折（小册子）：所有纸张按页码嵌套后沿中缝对折，钉在一起就是一整本小册子。'},
   cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。', intro:'书皮：上传封面、封底图片，自动拼成含书脊的成品书皮 PDF，可直接送印。'},
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
@@ -40489,7 +40498,7 @@ function showMode(mode){
   editpdfBlock.hidden = !isEditpdf;
   eyecareBlock.hidden = !isEyecare;
   unfoldBlock.hidden  = !isUnfold;
-  pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4');
+  pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4' || mode === 'fold6');
   const splitWrapEl = document.getElementById('splitWrap');
   if (splitWrapEl) splitWrapEl.hidden = pdfHow.hidden;
   coverHow.hidden    = !isCover;
@@ -41024,6 +41033,19 @@ function pairsFor(mode, total){
         res.push([base + (2 * s + 2),      base + (sp - 2 * s - 1)]); // 反面 (2s+2, N-2s-1)
       }
     }
+  } else if (mode === 'fold6'){
+    // 六张一折：每 6 张纸 = 1 个大节（24 个 PDF 页），节内用骑马钉嵌套排版，
+    // 6 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折（小册子）”）。
+    const SHEETS = 6;                  // 每次一起折的纸张数
+    const pPerSection = 4 * SHEETS;    // 每节 PDF 页数 = 24
+    for (let base = 0; base < total; base += pPerSection){
+      const sectionPages = Math.min(pPerSection, total - base);
+      const sp = Math.ceil(sectionPages / 4) * 4;   // 节内页数（向上取到 4 的倍数，不足补空白）
+      for (let s = 0; s < sp / 4; s++){              // sp/4 张纸 = 该节张数
+        res.push([base + (sp - 2 * s),     base + (2 * s + 1)]);   // 正面 (N-2s, 2s+1) 全局化
+        res.push([base + (2 * s + 2),      base + (sp - 2 * s - 1)]); // 反面 (2s+2, N-2s-1)
+      }
+    }
   } else {
     const S = total / 4;
     for (let s = 0; s < S; s++){
@@ -41508,7 +41530,7 @@ btnEl.onclick = async () => {
 
     const outBytes = await out.save();
     const blob = new Blob([outBytes], { type: 'application/pdf' });
-    doDownload(blob, (current === 'booklet' ? 'booklet_' : current === 'fold4' ? 'fold4_' : 'fold_') + fileObj.name);
+    doDownload(blob, (current === 'booklet' ? 'booklet_' : current === 'fold4' ? 'fold4_' : current === 'fold6' ? 'fold6_' : 'fold_') + fileObj.name);
     const splitNote = spreadCnt > 0
       ? '\n📖 跨页版已自动拆分：' + spreadCnt + ' 个横版跨页 → ' + (spreadCnt * 2) + ' 个书页 + ' + singleCnt + ' 个整页 = 共 ' + U + ' 页书（每张输出页 = 2 个书页）。'
       : '';
