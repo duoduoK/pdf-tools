@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>PDF 拼版工具 · 一张一折 / 整体对折（小册子）</title>
+<title>PDF 拼版工具 · 一张一折 / 整体对折</title>
 <script>
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
@@ -39871,7 +39871,7 @@
           <div class="mode" data-mode="booklet">
             <span class="tick">✓</span>
             <div class="ic">📚</div>
-            <div class="t">整体对折（小册子）</div>
+            <div class="t">整体对折</div>
             <div class="d">所有纸张嵌套，沿中缝订成整本。</div>
           </div>
           <div class="mode" data-mode="unfold">
@@ -39916,6 +39916,12 @@
             <div class="t">增删PDF</div>
             <div class="d">批量增、删、替换页面。</div>
           </div>
+          <div class="mode" data-mode="pagenum">
+            <span class="tick">✓</span>
+            <div class="ic">🔢</div>
+            <div class="t">标记页码</div>
+            <div class="d">给指定页码范围加页码（底部居中 / 页角）。</div>
+          </div>
         </div>
       </div>
       <!-- 阅读优化 -->
@@ -39926,13 +39932,13 @@
             <span class="tick">✓</span>
             <div class="ic">🌿</div>
             <div class="t">假装护眼</div>
-            <div class="d">把页面白底换成柔和的护眼纸色（米白道林/教材色/国产道林/自选），久看不刺眼。</div>
+            <div class="d">把页面白底换成柔和的护眼纸色，久看不刺眼。</div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 拼版（一张一折 / 整体对折（小册子）） -->
+    <!-- 拼版（一张一折 / 整体对折） -->
     <div id="pdfBlock">
       <p class="label">② 上传 PDF</p>
       <div class="drop" id="drop">
@@ -39940,6 +39946,7 @@
         <div class="small">仅支持 PDF，文件都在你的设备本地处理，无需担心</div>
         <input type="file" id="f" accept="application/pdf,.pdf" hidden>
         <div class="fname" id="fname"></div>
+        <div class="fname" id="uploadPages" style="margin-top:4px;color:#ffcf6b;font-size:13px;font-weight:600"></div>
       </div>
       <label id="splitWrap" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;cursor:pointer;font-size:13px;line-height:1.55">
         <input type="checkbox" id="splitSpreads" checked style="margin-top:3px;flex:none">
@@ -39949,14 +39956,16 @@
 
     <!-- 提取 -->
     <div id="extractBlock" hidden>
-      <p class="label">③ 提取方式</p>
-      <div class="seg" id="extractSeg">
-        <div class="opt on" data-ex="page">提取页码（单页）</div>
-        <div class="opt" data-ex="ends">提取收尾 2 页</div>
+      <p class="label">① 输入页码</p>
+      <input type="text" id="pageRanges" class="num" placeholder="例如 1-4,8 或 2-4，6-8">
+      <div class="fname" style="margin-top:6px;color:var(--sub);font-size:12.5px;line-height:1.55">
+        支持单页与范围，中英文逗号分隔。例：<b>1-4,8</b> → 第 1,2,3,4,8 页；<b>2-4,6-8</b> → 第 2,3,4,6,7,8 页。
       </div>
-      <p class="label" id="pageLabel" style="margin-top:18px">④ 输入页码</p>
-      <input type="number" id="pageNum" class="num" min="1" step="1" placeholder="例如 1">
-      <div class="fname" id="pageCount" style="color:var(--sub);font-weight:500;margin-top:6px"></div>
+      <p class="label" style="margin-top:16px">② 导出形式</p>
+      <div class="seg" id="extractOutSeg">
+        <div class="opt on" data-out="merged">合并文件（合成一个 PDF）</div>
+        <div class="opt" data-out="split">独立文件（每页一个 PDF）</div>
+      </div>
     </div>
 
     <!-- A4 切小 -->
@@ -40060,7 +40069,7 @@
       </div>
     </div>
 
-    <!-- 假装护眼 -->
+    <!-- 假装护眼（独立工具：仅改底色） -->
     <style>
       #eyecarePresets .ecchip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font:600 13px/1.2 system-ui,sans-serif;color:var(--txt);transition:border-color .15s,box-shadow .15s,transform .08s}
       #eyecarePresets .ecchip:active{transform:translateY(1px)}
@@ -40068,20 +40077,9 @@
       #eyecarePresets .ecsw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.15);background:var(--c,#eee);flex:0 0 auto}
     </style>
     <div id="eyecareBlock" hidden>
-      <p class="label">② 选一种护眼底色</p>
-      <div id="eyecarePresets" style="display:flex;gap:10px;flex-wrap:wrap">
-        <button type="button" class="ecchip on" data-hex="#F9F3E5" style="--c:#F9F3E5"><span class="ecsw"></span><span class="ect">米白道林</span></button>
-        <button type="button" class="ecchip" data-hex="#F7EED6" style="--c:#F7EED6"><span class="ecsw"></span><span class="ect">教材常用</span></button>
-        <button type="button" class="ecchip" data-hex="#F5EBCE" style="--c:#F5EBCE"><span class="ecsw"></span><span class="ect">国产道林</span></button>
-        <button type="button" class="ecchip ec-custom" id="eyecareCustomChip" style="--c:conic-gradient(from 0deg,red,orange,#ff0,lime,aqua,blue,magenta,red)"><span class="ecsw" id="eyecareCustomSw"></span><span class="ect">自选颜色</span></button>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">
-        <input type="color" id="eyecareColor" value="#f9f3e5"
-               style="width:52px;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer">
-        <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">米白道林 #F9F3E5 · RGB(249,243,229)</span>
-      </div>
-      <div class="fname" style="margin-top:12px;color:var(--sub);font-size:12.5px;line-height:1.6">
-        把每页的底色统一叠成上面这个颜色（默认<b>米白道林</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。
+      <p class="label">② 选择护眼底色</p>
+      <div class="fname" style="margin-top:8px;color:var(--sub);font-size:12.5px;line-height:1.6">
+        把每页的底色统一叠成下面这个颜色（默认<b>米白道林</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。选好颜色后点「生成新 PDF」即导出染色版（版式不变）。
       </div>
     </div>
 
@@ -40094,6 +40092,27 @@
       </div>
       <div class="fname" style="margin-top:12px;color:var(--sub);font-size:12.5px;line-height:1.6">
         上传的必须是<b>折页拼版后的 PDF</b>（每一页 = 一张纸的一个面，横向排 2 个原始页）。工具会按对应折法<b>反向拆开、还原成原始单页顺序</b>，导出普通的 1 页 1 张 PDF。
+      </div>
+    </div>
+
+    <!-- 标记页码 -->
+    <div id="pagenumBlock" hidden>
+      <p class="label">① 标记页码范围（对源 PDF 的第几页～第几页做标记）</p>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <input type="number" id="pnStart" class="num" min="1" step="1" placeholder="标记开始页" style="width:130px">
+        <span style="font-size:18px;color:var(--sub)">～</span>
+        <input type="number" id="pnEnd" class="num" min="1" step="1" placeholder="标记结束页" style="width:130px">
+      </div>
+      <div class="fname" style="margin-top:6px;color:var(--sub);font-size:12.5px;line-height:1.55">
+        例：3～109 表示对源第 3 页到第 109 页逐页标记
+      </div>
+      <p class="label" style="margin-top:16px">② 标记位置</p>
+      <div class="seg" id="pnPosSeg">
+        <div class="opt on" data-pos="center">底部居中</div>
+        <div class="opt" data-pos="corner">页角（奇右偶左）</div>
+      </div>
+      <div class="fname" id="pnPosIntro" style="margin-top:8px;color:var(--sub);font-size:12.5px;line-height:1.6">
+        页码水平居中，距底边 1cm
       </div>
     </div>
 
@@ -40169,6 +40188,29 @@
     </div>
 
 
+    <!-- 共享护眼底色选择器：假装护眼独立工具 与 其他工具的“叠加护眼色”都用它 -->
+    <div id="ecColorPick" hidden>
+      <p class="label">护眼底色</p>
+      <div id="eyecarePresets" style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" class="ecchip on" data-hex="#F9F3E5" style="--c:#F9F3E5"><span class="ecsw"></span><span class="ect">米白道林</span></button>
+        <button type="button" class="ecchip" data-hex="#F7EED6" style="--c:#F7EED6"><span class="ecsw"></span><span class="ect">教材常用</span></button>
+        <button type="button" class="ecchip" data-hex="#F5EBCE" style="--c:#F5EBCE"><span class="ecsw"></span><span class="ect">国产道林</span></button>
+        <button type="button" class="ecchip ec-custom" id="eyecareCustomChip" style="--c:conic-gradient(from 0deg,red,orange,#ff0,lime,aqua,blue,magenta,red)"><span class="ecsw" id="eyecareCustomSw"></span><span class="ect">自选颜色</span></button>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">
+        <input type="color" id="eyecareColor" value="#f9f3e5"
+               style="width:52px;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer">
+        <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">米白道林 #F9F3E5 · RGB(249,243,229)</span>
+      </div>
+    </div>
+
+    <!-- 叠加护眼色：仅在拼版折书 / 页面工具下出现，默认不勾选 -->
+    <div id="ecOverlayOpt" hidden>
+      <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;line-height:1.55">
+        <input type="checkbox" id="ecOverlayChk" style="margin-top:3px;flex:none">
+        <span><b>叠加护眼色</b> —— 拼版 / 处理完成后，再给每页染上护眼纸色（默认不勾选）。文字、图片保持原样。</span>
+      </label>
+    </div>
 
 
     <button class="go" id="b" disabled>生成新 PDF</button>
@@ -40183,7 +40225,7 @@
       3. 一张一折：每张纸沿中线对折、按序叠放；<br>
       4. 四张一折：每 4 张纸叠齐、沿中线一起对折成 16 页大节，大节按序叠放成书（省折纸次数）；<br>
       5. 六张一折：每 6 张纸叠齐、沿中线一起对折成 24 页大节，比四张一折更厚更紧凑（页数多时更省折纸次数）；<br>
-      6. 整体对折（小册子）：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
+      6. 整体对折：所有纸沿中缝嵌套、钉中缝，即成一整本。<br>
       <span style="color:#9aa3b2">提示：若点击后无法下载，请用系统浏览器（华为浏览器 / Chrome）打开本页，不要用微信/QQ 内置浏览器。</span>
     </div>
     <div class="how" id="coverHow" hidden>
@@ -40201,9 +40243,10 @@
     </div>
     <div class="how" id="extractHow" hidden>
       <b>使用方法（提取）：</b><br>
-      1. 选“提取”模式 → 上传 PDF，页面会显示“共 N 页”；<br>
-      2. <b>提取页码</b>：输入一个数字（1 ~ N），超出范围会报错，导出一个单页 PDF；<br>
-      3. <b>提取收尾 2 页</b>：一键导出首页与末页，共 2 个 PDF 文件（<b>first_</b> 开头为首页，<b>last_</b> 开头为末页）。<br>
+      1. 选“提取”模式 → 上传 PDF，上传区会显示“共 N 页”；<br>
+      2. <b>输入页码</b>：填单页或范围，中英文逗号分隔。例：<b>1-4,8</b> 提取第 1,2,3,4,8 页；<b>2-4,6-8</b> 提取第 2,3,4,6,7,8 页；<br>
+      3. <b>导出形式</b>：<b>独立文件</b> = 每页各导出一个 PDF；<b>合并文件</b> = 提取页合成一个 PDF；<br>
+      4. 勾选“叠加护眼色”可同步改底色。<br>
       <span style="color:#9aa3b2">提示：文件全程在本机处理，不会上传。</span>
     </div>
     <div class="how" id="a4tob5How" hidden>
@@ -40268,12 +40311,13 @@ const TOOL_META = {
   fold:    {ic:'📄', name:'一张一折', d:'每 4 页一个独立小节，各自对折。', intro:'一张一折：每 4 页裁成一个独立小节，各自单独对折，适合把长文档拆成多本小册子分别装订。'},
   fold4:   {ic:'📑', name:'四张一折', d:'4 张纸一起对折成 16 页大节。', intro:'四张一折：4 张纸叠在一起对折，组成 16 页的一个大节，折痕更厚、翻页更挺。'},
   fold6:   {ic:'📒', name:'六张一折', d:'6 张纸一起对折成 24 页大节。', intro:'六张一折：6 张纸叠在一起对折，组成 24 页的一个大节，比四张一折折痕更厚、整本更紧凑，适合页数较多时一次折一大本。'},
-  booklet: {ic:'📚', name:'整体对折（小册子）', d:'所有纸张嵌套，沿中缝订成整本。', intro:'整体对折（小册子）：所有纸张按页码嵌套后沿中缝对折，钉在一起就是一整本小册子。'},
+  booklet: {ic:'📚', name:'整体对折', d:'所有纸张嵌套，沿中缝订成整本。', intro:'整体对折：所有纸张按页码嵌套后沿中缝对折，钉在一起就是一整本小册子。'},
   cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。', intro:'书皮：上传封面、封底图片，自动拼成含书脊的成品书皮 PDF，可直接送印。'},
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
   a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
   editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'},
-  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的护眼纸色（米白道林/教材色/国产道林/自选），久看不刺眼。', intro:'假装护眼：把每页底色统一叠成柔和的护眼纸色（预设 米白道林 RGB 249,243,229 / 教材常用 RGB 247,238,214 / 国产道林 RGB 245,235,206，也可自选任意颜色）。文字、图片保持原样，只是整页染上一层暖色，白底不再刺眼，对文字版与图片/扫描版 PDF 都有效。'},
+  pagenum:  {ic:'🔢', name:'标记页码', d:'给指定页码范围加页码（底部居中 / 页角）。', intro:'标记页码：给 PDF 指定页码范围（如 3～109）的每一页底部加上页码，从开始页起以 1 自增（第 3 页显示 1）。底部居中：页码水平居中、距底边 1cm；页角：按原 PDF 页码奇偶，奇数页右下、偶数页左下，距底边 1cm、距外侧边 1cm。默认字体 Arial（以 Helvetica 替代，字形一致）、黑色，居中 8pt / 页角 9pt。'},
+  eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的护眼纸色（米白道林/教材色/国产道林/自选），久看不刺眼。', intro:'假装护眼：把每页底色叠成柔和纸色（米白道林 / 教材常用 / 国产道林 / 自选），白底不再刺眼，文字图片不变。'},
   unfold:  {ic:'↩️', name:'折页复原', d:'把折好的拼版 PDF 还原成正常单页顺序。', intro:'折页复原：把「一张一折」或「四张一折」拼版后的 PDF 反向拆开，还原成原始的单页阅读顺序，导出普通的 1 页 1 张 PDF。'}
 };
 function setActiveTool(mode){
@@ -40306,7 +40350,7 @@ function alignSteps(){
   const railRect = stepperEl.getBoundingClientRect();
   const centerOf = el => { if (!el) return null; const r = el.getBoundingClientRect(); return (r.top + r.height/2) - railRect.top; };
   const m = document.getElementById('modes');
-  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock, unfoldBlock].find(b => b && !b.hidden) || pdfBlock;
+  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock, unfoldBlock, pagenumBlock].find(b => b && !b.hidden) || pdfBlock;
   const labels = blk ? blk.querySelectorAll('.label') : [];
   const tops = [
     centerOf(m),
@@ -40366,11 +40410,10 @@ const coverBlock = document.getElementById('coverBlock');
 const pdfHow     = document.getElementById('pdfHow');
 const coverHow   = document.getElementById('coverHow');
 const extractBlock = document.getElementById('extractBlock');
-const extractSeg   = document.getElementById('extractSeg');
-const pageNumEl    = document.getElementById('pageNum');
-const pageCountEl  = document.getElementById('pageCount');
-const pageLabelEl  = document.getElementById('pageLabel');
+const pageRangesEl  = document.getElementById('pageRanges');
+const extractOutSeg = document.getElementById('extractOutSeg');
 const extractHow   = document.getElementById('extractHow');
+const uploadPagesEl = document.getElementById('uploadPages');
 const a4tob5Block  = document.getElementById('a4tob5Block');
 const a4tob5How    = document.getElementById('a4tob5How');
 const a4tob5Seg    = document.getElementById('a4tob5Seg');
@@ -40387,8 +40430,11 @@ const editpdfAddPos   = document.getElementById('editpdfAddPos');
 const editpdfAddFile  = document.getElementById('editpdfAddFile');
 const editpdfAddName  = document.getElementById('editpdfAddName');
 const dropAddEl       = document.getElementById('dropAdd');
-// 假装护眼
+// 假装护眼（独立改色工具 + 其他工具可勾选“叠加护眼色”）
 const eyecareBlock    = document.getElementById('eyecareBlock');
+const ecColorPick     = document.getElementById('ecColorPick');
+const ecOverlayOpt    = document.getElementById('ecOverlayOpt');
+const ecOverlayChk    = document.getElementById('ecOverlayChk');
 const eyecareColorEl  = document.getElementById('eyecareColor');
 const eyecareHexEl    = document.getElementById('eyecareHex');
 const eyecarePresets  = document.getElementById('eyecarePresets');
@@ -40396,9 +40442,22 @@ const eyecareCustomChip = document.getElementById('eyecareCustomChip');
 const eyecareCustomSw   = document.getElementById('eyecareCustomSw');
 // 护眼底色预设（hex 小写 → 名称）
 const EC_PRESETS = { 'f9f3e5':'米白道林', 'f7eed6':'教材常用', 'f5ebce':'国产道林' };
+// 叠加护眼色：其他工具勾选后才在输出上叠印；默认不勾。
+function updateEcColorVis(){
+  const solo = (current === 'eyecare');
+  const overlayOn = !!(ecOverlayChk && ecOverlayChk.checked);
+  if (ecColorPick) ecColorPick.hidden = !(solo || overlayOn);
+}
+if (ecOverlayChk) ecOverlayChk.addEventListener('change', updateEcColorVis);
 // 折页复原
 const unfoldBlock     = document.getElementById('unfoldBlock');
 const unfoldSeg       = document.getElementById('unfoldSeg');
+// 标记页码
+const pagenumBlock    = document.getElementById('pagenumBlock');
+const pnStartEl       = document.getElementById('pnStart');
+const pnEndEl         = document.getElementById('pnEnd');
+const pnPosSeg        = document.getElementById('pnPosSeg');
+const pnPosIntroEl    = document.getElementById('pnPosIntro');
 // 增加：空白 PDF 相关
 const editpdfAddBlank      = document.getElementById('editpdfAddBlank');
 const editpdfAddBlankWrap  = document.getElementById('editpdfAddBlankWrap');
@@ -40414,7 +40473,8 @@ const dropRepEl       = document.getElementById('dropRep');
 const editpdfOps = new Set();
 let editpdfAddFileObj = null;
 let editpdfRepFileObj = null;
-let currentExtract = 'page';
+let extractOut = 'merged';
+let pnPos = 'center';
 let a4tob5Size = 'small';
 let a4tob5PlaceMode = 'edge';
 let a4tob5ScaleK66 = false;
@@ -40483,28 +40543,35 @@ modesEl.querySelectorAll('.mode').forEach(el => {
     showMode(current);
   };
 });
+// 假装护眼：独立工具（选该模式 = 仅改底色）；其他工具勾选“叠加护眼色”后才在输出上叠印。
 
 function showMode(mode){
   const isCover = (mode === 'cover');
   const isExtract = (mode === 'extract');
   const isA4tob5 = (mode === 'a4tob5');
   const isEditpdf = (mode === 'editpdf');
-  const isEyecare = (mode === 'eyecare');
   const isUnfold = (mode === 'unfold');
+  const isPagenum = (mode === 'pagenum');
+  const isEyecare = (mode === 'eyecare');
   pdfBlock.hidden    = isCover;
   coverBlock.hidden  = !isCover;
   a4tob5Block.hidden  = !isA4tob5;
   extractBlock.hidden = !isExtract;
   editpdfBlock.hidden = !isEditpdf;
-  eyecareBlock.hidden = !isEyecare;
+  eyecareBlock.hidden = !isEyecare;                       // 独立护眼工具的说明
   unfoldBlock.hidden  = !isUnfold;
+  pagenumBlock.hidden = !isPagenum;
+  if (isPagenum) updatePnPosIntro();
+  // “叠加护眼色”勾选框：仅在拼版折书 / 页面工具下出现（书皮与护眼独立工具不出现）
+  if (ecOverlayOpt) ecOverlayOpt.hidden = isEyecare || !EC_STACKABLE.has(mode);
+  updateEcColorVis();                                      // 色卡：护眼独立模式始终显示；其他工具勾选叠加后才显示
   pdfHow.hidden      = !(mode === 'fold' || mode === 'booklet' || mode === 'fold4' || mode === 'fold6');
   const splitWrapEl = document.getElementById('splitWrap');
   if (splitWrapEl) splitWrapEl.hidden = pdfHow.hidden;
   coverHow.hidden    = !isCover;
   extractHow.hidden  = !isExtract;
   a4tob5How.hidden   = !isA4tob5;
-  if (isExtract && fileObj) showPageCount(fileObj);
+  if (!isCover && fileObj && uploadPagesEl) uploadPagesEl.textContent = (filePages > 0 ? '共 ' + filePages + ' 页' : '');
   if (isCover){ syncCoverPaper(); checkPaper(); }
   refreshBtn();
   setActiveTool(mode);
@@ -40541,8 +40608,8 @@ function pick(f){
       ? '⚠️ 文件约 ' + mb.toFixed(0) + ' MB 较大，手机浏览器可能因内存不足失败。建议：用电脑打开本页处理，或在桌面浏览器打开离线包 booklet_offline.zip。'
       : '⚠️ 文件约 ' + mb.toFixed(0) + ' MB 较大，生成时页面会卡住数十秒～几分钟，请勿关闭页面。') + ' 仍可直接点「生成新 PDF」。';
   }
-  if (current === 'extract'){
-    if (mb > 150) filePages = 0;            // 大文件不在导入时加载，避免卡死；生成时再读
+  if (current !== 'cover'){
+    if (mb > 150){ filePages = 0; if (uploadPagesEl) uploadPagesEl.textContent = ''; }
     else showPageCount(f);
   }
   if (current === 'editpdf'){
@@ -40583,9 +40650,8 @@ async function showPageCount(f){
   try {
     const s = await loadPdf(f);
     filePages = s.getPageCount();
-    pageCountEl.textContent = '共 ' + filePages + ' 页';
-    pageNumEl.max = filePages;
-  } catch (e) { filePages = 0; pageCountEl.textContent = ''; }
+    if (uploadPagesEl) uploadPagesEl.textContent = '共 ' + filePages + ' 页';
+  } catch (e) { filePages = 0; if (uploadPagesEl) uploadPagesEl.textContent = ''; }
 }
 
 // 书皮：尺寸 / 方向 / 封面上传
@@ -40601,16 +40667,27 @@ orientSeg.querySelectorAll('.opt').forEach(o => {
 paperEl.onchange = checkPaper;
 spineEl.addEventListener('input', checkPaper);
 if (coverScaleEl) coverScaleEl.addEventListener('change', checkPaper);
-extractSeg.querySelectorAll('.opt').forEach(o => {
+extractOutSeg.querySelectorAll('.opt').forEach(o => {
   o.onclick = () => {
-    extractSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
+    extractOutSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
     o.classList.add('on');
-    currentExtract = o.dataset.ex;
-    const isPage = (currentExtract === 'page');
-    pageLabelEl.hidden = !isPage;
-    pageNumEl.hidden = !isPage;
+    extractOut = o.dataset.out;
   };
 });
+pnPosSeg.querySelectorAll('.opt').forEach(o => {
+  o.onclick = () => {
+    pnPosSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
+    o.classList.add('on');
+    pnPos = o.dataset.pos;
+    updatePnPosIntro();
+  };
+});
+function updatePnPosIntro(){
+  if (!pnPosIntroEl) return;
+  pnPosIntroEl.innerHTML = (pnPos === 'corner')
+    ? '奇数页右下、偶数页左下，距底边 1cm、距外侧边 1cm<br>奇偶判定以源文件原始页码为准，非新增标记页码。'
+    : '页码水平居中，距底边 1cm';
+}
 a4tob5Seg.querySelectorAll('.opt').forEach(o => {
   o.onclick = () => {
     a4tob5Seg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
@@ -41022,7 +41099,7 @@ function pairsFor(mode, total){
     }
   } else if (mode === 'fold4'){
     // 四张一折：每 4 张纸 = 1 个大节（16 个 PDF 页），节内用骑马钉嵌套排版，
-    // 4 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折（小册子）”）。
+    // 4 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折”）。
     const SHEETS = 4;                  // 每次一起折的纸张数
     const pPerSection = 4 * SHEETS;    // 每节 PDF 页数 = 16
     for (let base = 0; base < total; base += pPerSection){
@@ -41035,7 +41112,7 @@ function pairsFor(mode, total){
     }
   } else if (mode === 'fold6'){
     // 六张一折：每 6 张纸 = 1 个大节（24 个 PDF 页），节内用骑马钉嵌套排版，
-    // 6 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折（小册子）”）。
+    // 6 张纸一起对折；多个大节叠放成书。节与节之间不跨页嵌套（不同于整本“整体对折”）。
     const SHEETS = 6;                  // 每次一起折的纸张数
     const pPerSection = 4 * SHEETS;    // 每节 PDF 页数 = 24
     for (let base = 0; base < total; base += pPerSection){
@@ -41077,58 +41154,70 @@ function doDownload(blob, filename){
   else setTimeout(() => URL.revokeObjectURL(url), 8000);
 }
 
-// 生成提取 PDF
+// 生成提取 PDF：解析页码范围，按“独立文件 / 合并文件”导出
+function parsePages(spec, N){
+  const out = new Set();
+  const parts = spec.split(/[,，]/).map(x => x.trim()).filter(Boolean);
+  if (!parts.length) return [];
+  for (const p of parts){
+    if (p.indexOf('-') >= 0){
+      const seg = p.split('-').map(x => parseInt(x, 10));
+      if (seg.length !== 2 || !Number.isInteger(seg[0]) || !Number.isInteger(seg[1]) || seg[0] < 1 || seg[1] < 1) return null;
+      const lo = Math.min(seg[0], seg[1]), hi = Math.max(seg[0], seg[1]);
+      for (let i = lo; i <= hi; i++) out.add(i);
+    } else {
+      const n = parseInt(p, 10);
+      if (!Number.isInteger(n) || n < 1) return null;
+      out.add(n);
+    }
+  }
+  const sorted = [...out].sort((a, b) => a - b);
+  if (sorted[sorted.length - 1] > N) return null;
+  return sorted;
+}
+
 async function extractGenerate(){
   if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; return; }
   if (isHarmonyOS && (inWeChat || inQQ)){
     msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
     return;
   }
+  const spec = (pageRangesEl && pageRangesEl.value || '').trim();
+  if (!spec){ msgEl.textContent = '⚠️ 请先输入页码（支持单页与范围，如 1-4,8）。'; return; }
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
   try {
     const src = await loadPdf(fileObj);
     const N = src.getPageCount();
-    if (currentExtract === 'page'){
-      const p = parseInt(pageNumEl.value, 10);
-      if (!Number.isInteger(p) || p < 1){
-        msgEl.textContent = '⚠️ 请输入有效的页码（正整数，1 ~ ' + N + '）。';
-        btnEl.disabled = false; return;
-      }
-      if (p > N){
-        msgEl.textContent = '⚠️ 页码超出范围：文件共 ' + N + ' 页，最大可输入 ' + N + '。';
-        btnEl.disabled = false; return;
-      }
-      const out = await PDFDocument.create();
-      const pg = src.getPage(p - 1);
-      const cb = visibleBoxOf(pg);
-      const emb = await safeEmbedPage(out, src, pg);
-      const np = out.addPage([cb.width, cb.height]);
-      np.drawPage(emb, { x:0, y:0, width: cb.width, height: cb.height });
-      doDownload(new Blob([await out.save()], { type:'application/pdf' }), 'page_' + p + '_' + fileObj.name);
-      msgEl.textContent = '✅ 已提取第 ' + p + ' 页（共 ' + N + ' 页），开始下载。';
-    } else {
-      // 提取收尾 2 页：首页 + 末页，导出 2 个文件
-      if (N < 2){
-        msgEl.textContent = '⚠️ 文件不足 2 页，无法提取收尾两页。';
-        btnEl.disabled = false; return;
-      }
-      const out1 = await PDFDocument.create();
-      const pg1 = src.getPage(0);
-      const cb1 = visibleBoxOf(pg1);
-      const emb1 = await safeEmbedPage(out1, src, pg1);
-      const n1 = out1.addPage([cb1.width, cb1.height]);
-      n1.drawPage(emb1, { x:0, y:0, width: cb1.width, height: cb1.height });
-      doDownload(new Blob([await out1.save()], { type:'application/pdf' }), 'first_' + fileObj.name, true);
+    const pages = parsePages(spec, N);
+    if (pages === null){ msgEl.textContent = '⚠️ 页码格式有误或超出范围（文件共 ' + N + ' 页）。例：1-4,8 或 2-4，6-8'; btnEl.disabled = false; return; }
+    if (!pages.length){ msgEl.textContent = '⚠️ 没有可提取的页码。'; btnEl.disabled = false; return; }
 
-      const out2 = await PDFDocument.create();
-      const pgL = src.getPage(N - 1);
-      const cbL = visibleBoxOf(pgL);
-      const emb2 = await safeEmbedPage(out2, src, pgL);
-      const n2 = out2.addPage([cbL.width, cbL.height]);
-      n2.drawPage(emb2, { x:0, y:0, width: cbL.width, height: cbL.height });
-      doDownload(new Blob([await out2.save()], { type:'application/pdf' }), 'last_' + fileObj.name, false);
-      msgEl.textContent = '✅ 已提取收尾 2 页（第 1 页 与 第 ' + N + ' 页），开始下载 2 个文件：\n· first_' + fileObj.name + '（首页）\n· last_' + fileObj.name + '（末页）';
+    if (extractOut === 'merged'){
+      const out = await PDFDocument.create();
+      for (const p of pages){
+        const pg = src.getPage(p - 1);
+        const cb = visibleBoxOf(pg);
+        const emb = await safeEmbedPage(out, src, pg);
+        const np = out.addPage([cb.width, cb.height]);
+        np.drawPage(emb, { x:0, y:0, width: cb.width, height: cb.height });
+      }
+      await finalizeDoc(out, 'extract_' + fileObj.name);
+      msgEl.textContent = '✅ 已提取 ' + pages.length + ' 页（共 ' + N + ' 页），合并为一个 PDF 开始下载：' + pages.join(',') + ecSuffix();
+    } else {
+      let ok = 0;
+      for (let i = 0; i < pages.length; i++){
+        const p = pages[i];
+        const out = await PDFDocument.create();
+        const pg = src.getPage(p - 1);
+        const cb = visibleBoxOf(pg);
+        const emb = await safeEmbedPage(out, src, pg);
+        const np = out.addPage([cb.width, cb.height]);
+        np.drawPage(emb, { x:0, y:0, width: cb.width, height: cb.height });
+        await finalizeDoc(out, 'p' + p + '_' + fileObj.name);
+        ok++;
+      }
+      msgEl.textContent = '✅ 已提取 ' + ok + ' 页为 ' + ok + ' 个独立 PDF（共 ' + N + ' 页）：' + pages.join(',') + ecSuffix();
     }
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
@@ -41183,12 +41272,11 @@ async function a4tob5Generate(){
       page.drawRectangle({ x:0, y:0, width:a4w, height:a4h, color: rgb(1,1,1) });   // 白底
       page.drawPage(emb[i], { x:dx, y:dy, width:dW, height:dH });
     }
-    const outBytes = await out.save();
-    doDownload(new Blob([outBytes], { type:'application/pdf' }), 'A4切小_' + fileObj.name);
+    await finalizeDoc(out, 'A4切小_' + fileObj.name);
     const placeTip = edge
       ? `顶格左右交替：内页框贴纸张上边，奇数页贴左边、偶数页贴右边。\n用 A4 纸「沿长边双面」打印后，沿【右边 + 下边】两刀裁切即得 ${SIZELABEL[key]}，无需裁四边。`
       : `已居中放进 A4 上的 ${bwMm}×${bhMm} mm（${SIZELABEL[key]}）白框内${K66 > 1 ? '（已 66党放大，小程序压完回到真实尺寸）' : ''}。\n用 A4 纸打印后，沿内页框裁掉四周白边，即得 ${SIZELABEL[key]} 大小资料。`;
-    msgEl.textContent = `✅ 已生成：${N} 页内容，输出为 ${bwMm}×${bhMm} mm（${SIZELABEL[key]}${K66 > 1 ? '，已66党放大' : ''}）的 A4 打印稿。\n${placeTip}`;
+    msgEl.textContent = `✅ 已生成：${N} 页内容，输出为 ${bwMm}×${bhMm} mm（${SIZELABEL[key]}${K66 > 1 ? '，已66党放大' : ''}）的 A4 打印稿。\n${placeTip}` + ecSuffix();
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
@@ -41303,8 +41391,7 @@ async function editpdfGenerate(){
       if (it.emb) np.drawPage(it.emb, { x: it.drawX, y: it.drawY, width: it.drawW, height: it.drawH });
     }
 
-    const outBytes = await out.save();
-    doDownload(new Blob([outBytes], { type: 'application/pdf' }), '增删PDF_' + fileObj.name);
+    await finalizeDoc(out, '增删PDF_' + fileObj.name);
 
     const toMM = v => Math.round(v / 2.834645669);
     const added = addPages ? addPages.pages.length : 0;
@@ -41319,7 +41406,7 @@ async function editpdfGenerate(){
       tip += '\n· 空白页尺寸与原文件一致（' + toMM(refW) + '×' + toMM(refH) + ' mm）';
     }
     tip += '\n开始下载。';
-    msgEl.textContent = tip;
+    msgEl.textContent = tip + ecSuffix();
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
@@ -41382,69 +41469,158 @@ async function unfoldGenerate(){
     if (emb) page.drawPage(emb, { x: 0, y: 0, width: W, height: H });
   }
 
-  const outBytes = await out.save();
-  const blob = new Blob([outBytes], { type: 'application/pdf' });
   const base = fileObj.name.replace(/\.pdf$/i, '');
-  doDownload(blob, base + '_复原.pdf');
-  msgEl.textContent = '✅ 已还原：' + S + ' 张折页 → ' + total + ' 个原始页，开始下载。' + warn;
+  await finalizeDoc(out, base + '_复原.pdf');
+  msgEl.textContent = '✅ 已还原：' + S + ' 张折页 → ' + total + ' 个原始页，开始下载。' + warn + ecSuffix();
 }
 
 // 假装护眼：把每页底色统一叠成指定纸色（Multiply 正片叠底）。
 // 原理：白 × 纸色 = 纸色，黑字 × 纸色 ≈ 黑字；文字/矢量/图片都不改动，
 // 只在整个页面上追加一层叠印矩形，所以对「文字版」与「图片/扫描版」PDF 都有效。
+// —— 现在它既是“叠加图层”（可被拼版/页面工具叠加），也可勾选“仅护眼”单独导出染色版。
+
+// 可叠加护眼的主工具范围（拼版折书 + 页面工具；书皮不在内）
+const EC_STACKABLE = new Set(['fold','booklet','fold4','fold6','extract','a4tob5','editpdf','unfold','pagenum']);
+
+// 核心：给任意 PDFDocument 的每一页追加一层 Multiply 护眼叠印矩形（原地修改 doc）。
+async function applyEyecareToDoc(doc, hex){
+  const hv = (hex || '#f9f3e5').replace('#','');
+  const cr = parseInt(hv.slice(0,2),16)/255, cg = parseInt(hv.slice(2,4),16)/255, cb = parseInt(hv.slice(4,6),16)/255;
+  // 全文档共用一个 ExtGState（BM=Multiply），避免每页重复对象
+  const gs = doc.context.obj({});
+  gs.set(PDFName.of('Type'), PDFName.of('ExtGState'));
+  gs.set(PDFName.of('BM'), PDFName.of('Multiply'));
+  gs.set(PDFName.of('ca'), doc.context.obj(1));
+  gs.set(PDFName.of('CA'), doc.context.obj(1));
+  const gsRef = doc.context.register(gs);
+
+  for (const page of doc.getPages()){
+    const mb = page.getMediaBox();
+    // ★ 必须先用 normalizedEntries()（内部调 normalize()）：
+    //   1) 把源内容整体包进 q…Q —— 内容流是“拼接解析”的，图形状态跨流延续；
+    //      有些 PDF（如电子发票）在内容流顶层就设了 cm 且没有 q/Q 包住，
+    //      不包起来的话，追加的矩形会被残留 CTM 一起变换 → 只盖住一部分。
+    //   2) 补齐“继承自父节点 / 完全缺失”的 Resources（空白页常没有自己的 /Resources → undefined 抛异常）。
+    const res = page.node.normalizedEntries().Resources;
+    let eg = res.lookup(PDFName.of('ExtGState'), PDFDict);
+    if (!eg){ eg = doc.context.obj({}); res.set(PDFName.of('ExtGState'), doc.context.register(eg)); }
+    eg.set(PDFName.of('MO'), gsRef);
+    // 盖住整个 MediaBox（比 CropBox 大，保证可见区全覆盖；矩形随页面一起旋转）
+    const cs = 'q\n/MO gs\n' + cr.toFixed(4) + ' ' + cg.toFixed(4) + ' ' + cb.toFixed(4) + ' rg\n'
+             + mb.x.toFixed(3) + ' ' + mb.y.toFixed(3) + ' ' + mb.width.toFixed(3) + ' ' + mb.height.toFixed(3) + ' re f\nQ\n';
+    const ref = doc.context.register(doc.context.flateStream(cs));
+    const cur = page.node.get(PDFName.of('Contents'));
+    const list = [];
+    if (cur){
+      const resolved = (cur instanceof PDFRef) ? doc.context.lookup(cur) : cur;
+      if (resolved instanceof PDFArray) list.push(...resolved.asArray());
+      else list.push(cur);
+    }
+    list.push(ref);
+    page.node.set(PDFName.of('Contents'), doc.context.obj(list));
+  }
+}
+
+// 标记页码：给源 PDF 指定页码范围逐页加页码（底部居中 / 页角奇右偶左）
+async function pagenumGenerate(){
+  if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  if (isHarmonyOS && (inWeChat || inQQ)){
+    msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
+    return;
+  }
+  const s = parseInt(pnStartEl.value, 10);
+  const e = parseInt(pnEndEl.value, 10);
+  if (!Number.isInteger(s) || !Number.isInteger(e) || s < 1 || e < s){
+    msgEl.textContent = '⚠️ 请填写有效的起始 / 结束页码（起始 ≤ 结束，且都 ≥ 1）。';
+    return;
+  }
+  btnEl.disabled = true;
+  msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
+  try {
+    const src = await loadPdf(fileObj);
+    const N = src.getPageCount();
+    if (e > N){
+      msgEl.textContent = '⚠️ 结束页码超出范围：文件共 ' + N + ' 页，最大可填 ' + N + '。';
+      btnEl.disabled = false; return;
+    }
+    const out = await PDFDocument.create();
+    const font = await out.embedFont(PDFLib.StandardFonts.Helvetica); // Arial 替身，字形一致
+    const PT_PER_CM = 28.34645669;            // 1cm = 28.3465pt（1pt = 1/72 inch）
+    const bottomMargin = 1.0 * PT_PER_CM;     // 距底边 1cm
+    const sideMargin   = 1.0 * PT_PER_CM;     // 距外侧边 1cm
+    const isCorner = (pnPos === 'corner');
+    const size = isCorner ? 9 : 8;            // 页角 9pt / 居中 8pt
+    const color = rgb(0, 0, 0);
+    let marked = 0;
+    for (let i = 0; i < N; i++){
+      const pg = src.getPage(i);
+      const cb = visibleBoxOf(pg);
+      const rot = pg.getRotation().angle;
+      const swp = (rot === 90 || rot === 270);
+      const pw = swp ? cb.height : cb.width;   // 旋转后视觉宽
+      const ph = swp ? cb.width : cb.height;   // 旋转后视觉高
+      const bm = bakeMatrix(rot, cb.width, cb.height);
+      const emb = await safeEmbedPage(out, src, pg, bm);
+      const np = out.addPage([pw, ph]);
+      np.drawPage(emb, { x:0, y:0, width: pw, height: ph });
+      const pgNo = i + 1;                      // 源 PDF 真实页码
+      if (pgNo >= s && pgNo <= e){
+        const text = String(pgNo - s + 1);     // 从开始页起自增：第 s 页显示 1
+        const tw = font.widthOfTextAtSize(text, size);
+        let x;
+        if (isCorner){
+          // 奇数页右下、偶数页左下（按“原 PDF 页码”奇偶判定，不是后期标记的页码）
+          x = (pgNo % 2 === 1) ? (pw - sideMargin - tw) : sideMargin;
+        } else {
+          x = pw / 2 - tw / 2;                 // 底部居中
+        }
+        np.drawText(text, { x, y: bottomMargin, size, font, color });
+        marked++;
+      }
+    }
+    await finalizeDoc(out, 'pagenum_' + fileObj.name);
+    msgEl.textContent = '✅ 已在第 ' + s + '–' + e + ' 页底部添加页码（共 ' + marked + ' 页标记，页码从 1 自增：第 ' + s + ' 页显示 1），开始下载。' + ecSuffix();
+  } catch (err) {
+    msgEl.textContent = '出错了：' + err;
+  } finally {
+    btnEl.disabled = false;
+    afterGen();
+  }
+}
+
+// 生成收尾：若勾选“叠加护眼色”且当前主工具可叠加，先在输出文档上叠印护眼，再保存下载。
+async function finalizeDoc(out, baseName){
+  let name = baseName;
+  if (ecOverlayChk && ecOverlayChk.checked){
+    await applyEyecareToDoc(out, eyecareColorEl && eyecareColorEl.value);
+    name = baseName.replace(/\.pdf$/i, '_护眼.pdf');
+  }
+  const outBytes = await out.save();
+  doDownload(new Blob([outBytes], { type:'application/pdf' }), name);
+  return name;
+}
+
+// 成功提示后缀：叠加护眼时附一句说明
+function ecSuffix(){
+  if (ecOverlayChk && ecOverlayChk.checked){
+    const hv = (eyecareColorEl && eyecareColorEl.value || '#f9f3e5').toUpperCase().replace('#','');
+    return '\n🌿 已叠加护眼底色 #' + hv + '。';
+  }
+  return '';
+}
+
+// 假装护眼（独立工具）：不改版式，把源 PDF 每页底色叠成护眼色后 1:1 导出染色版。
 async function eyecareGenerate(){
   if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
   const src = await loadPdf(fileObj);
   const pages = src.getPages();
   if (!pages.length){ msgEl.textContent = '这个 PDF 没有可处理的页面'; return; }
-
-  // 解析目标纸色（0~1）
-  const hv = (eyecareColorEl && eyecareColorEl.value ? eyecareColorEl.value : '#f9f3e5').replace('#','');
-  const cr = parseInt(hv.slice(0,2),16)/255, cg = parseInt(hv.slice(2,4),16)/255, cb = parseInt(hv.slice(4,6),16)/255;
-
-  // 全文档共用一个 ExtGState（BM=Multiply），避免每页重复对象
-  const gs = src.context.obj({});
-  gs.set(PDFName.of('Type'), PDFName.of('ExtGState'));
-  gs.set(PDFName.of('BM'), PDFName.of('Multiply'));
-  gs.set(PDFName.of('ca'), src.context.obj(1));
-  gs.set(PDFName.of('CA'), src.context.obj(1));
-  const gsRef = src.context.register(gs);
-
-  let done = 0;
-  for (const page of pages){
-    const mb = page.getMediaBox();
-    // ★ 必须先用 normalizedEntries()（内部调 normalize()）：
-    //   1) 它把源内容整体包进 q…Q —— 内容流是「拼接解析」的，图形状态跨流延续。
-    //      有些 PDF（如电子发票）在内容流顶层就设了 cm（例：0.75 缩放＋垂直翻转）且没有 q/Q 包住，
-    //      不包起来的话，我们追加的矩形会被这个残留 CTM 一起变换 → 只盖住一部分、其余留白。
-    //   2) 它同时补齐「继承自父节点 / 完全缺失」的 Resources（空白页常常没有自己的 /Resources，
-    //      直接 page.node.Resources() 会返回 undefined → 抛异常）。
-    const res = page.node.normalizedEntries().Resources;
-    let eg = res.lookup(PDFName.of('ExtGState'), PDFDict);
-    if (!eg){ eg = src.context.obj({}); res.set(PDFName.of('ExtGState'), src.context.register(eg)); }
-    eg.set(PDFName.of('MO'), gsRef);
-    // 盖住整个 MediaBox（比 CropBox 大，保证可见区全覆盖；矩形随页面一起旋转）
-    const cs = 'q\n/MO gs\n' + cr.toFixed(4) + ' ' + cg.toFixed(4) + ' ' + cb.toFixed(4) + ' rg\n'
-             + mb.x.toFixed(3) + ' ' + mb.y.toFixed(3) + ' ' + mb.width.toFixed(3) + ' ' + mb.height.toFixed(3) + ' re f\nQ\n';
-    // 追加到 Contents 末尾（盖在所有内容之上；normalize 已确保 Contents 是数组）
-    const ref = src.context.register(src.context.flateStream(cs));
-    const cur = page.node.get(PDFName.of('Contents'));
-    const list = [];
-    if (cur){
-      const resolved = (cur instanceof PDFRef) ? src.context.lookup(cur) : cur;
-      if (resolved instanceof PDFArray) list.push(...resolved.asArray());
-      else list.push(cur);
-    }
-    list.push(ref);
-    page.node.set(PDFName.of('Contents'), src.context.obj(list));
-    done++;
-  }
-
+  await applyEyecareToDoc(src, eyecareColorEl && eyecareColorEl.value);
   const outBytes = await src.save();
-  const blob = new Blob([outBytes], { type: 'application/pdf' });
+  const blob = new Blob([outBytes], { type:'application/pdf' });
   const base = fileObj.name.replace(/\.pdf$/i, '');
   doDownload(blob, base + '_护眼.pdf');
-  msgEl.textContent = '✅ 已完成：' + done + ' 页底色叠成 #' + hv.toUpperCase() + '，开始下载。';
+  msgEl.textContent = '✅ 已完成：' + pages.length + ' 页底色叠成护眼色，开始下载（仅染色，版式不变）。';
 }
 
 btnEl.onclick = async () => {
@@ -41464,6 +41640,7 @@ btnEl.onclick = async () => {
   if (current === 'a4tob5'){ await a4tob5Generate(); afterGen(); return; }
   if (current === 'eyecare'){ await eyecareGenerate(); afterGen(); return; }
   if (current === 'unfold'){ await unfoldGenerate(); afterGen(); return; }
+  if (current === 'pagenum'){ await pagenumGenerate(); afterGen(); return; }
   if (!fileObj) { msgEl.textContent = '请先选一个 PDF 文件'; genState = 'idle'; updateStepper(); return; }
   btnEl.disabled = true;
   msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
@@ -41528,13 +41705,11 @@ btnEl.onclick = async () => {
       if (R - 1 < U) page.drawPage(emb[R - 1], { x: W, y: 0, width: W, height: H });
     }
 
-    const outBytes = await out.save();
-    const blob = new Blob([outBytes], { type: 'application/pdf' });
-    doDownload(blob, (current === 'booklet' ? 'booklet_' : current === 'fold4' ? 'fold4_' : current === 'fold6' ? 'fold6_' : 'fold_') + fileObj.name);
+    await finalizeDoc(out, (current === 'booklet' ? 'booklet_' : current === 'fold4' ? 'fold4_' : current === 'fold6' ? 'fold6_' : 'fold_') + fileObj.name);
     const splitNote = spreadCnt > 0
       ? '\n📖 跨页版已自动拆分：' + spreadCnt + ' 个横版跨页 → ' + (spreadCnt * 2) + ' 个书页 + ' + singleCnt + ' 个整页 = 共 ' + U + ' 页书（每张输出页 = 2 个书页）。'
       : '';
-    msgEl.textContent = `✅ 已生成（${U} 页书 → ${total / 2} 张跨页，双面打印 = ${total / 4} 张纸）。${splitNote}\n开始下载，双面打印后对折即可。`;
+    msgEl.textContent = `✅ 已生成（${U} 页书 → ${total / 2} 张跨页，双面打印 = ${total / 4} 张纸）。${splitNote}\n开始下载，双面打印后对折即可。` + ecSuffix();
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
