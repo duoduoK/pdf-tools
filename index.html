@@ -39985,8 +39985,7 @@
 
       <label style="display:flex;align-items:flex-start;gap:8px;margin-top:14px;cursor:pointer;font-size:13px;line-height:1.55">
         <input type="checkbox" id="a4tob5Scale" style="margin-top:3px;flex:none">
-        <span><b>66党放大必备</b> —— 小程序打印会自动留边（整页约被压到 97.05%），勾选后内页框整体预放大 1/0.9705 倍：<br>
-        A5（148×210）→ <b>152.5×216.4</b> mm；小B5（176×250）→ 181.3×257.6 mm；大B5（182×257）→ 187.5×264.8 mm。压完回到真实尺寸。</span>
+        <span><b>66党放大必备</b> —— 勾选后内页框整体预放大 1/0.9705 倍（抵消打印边距缩放）</span>
       </label>
 
       <p class="label" style="margin-top:14px">④ 打印纸张</p>
@@ -39995,7 +39994,7 @@
       </select>
       <div id="a4tob5Note" style="margin-top:6px;font-size:12.5px;color:#9aa3b2">
         <b>居中</b>：内容居中放进 B5 白框，A4 打印后沿框裁四周白边得 B5。<br>
-        <b>顶格左右交替</b>：B5 框顶格贴纸的<b>上边</b>，奇数页贴<b>左边</b>、偶数页贴<b>右边</b>（内容按原比例 1:1 放进 B5 框、不变形）。用打印机「<b>沿长边双面</b>」打印后，正反面在阅读视图里都落在同一左上位置，最终只需沿<b>右边 + 下边</b>裁两刀即得 B5，无需裁四边。
+        <b>顶格左右交替</b>：B5 框顶齐贴纸上边，奇数页靠左、偶数页靠右；
       </div>
     </div>
 
@@ -40071,15 +40070,17 @@
 
     <!-- 假装护眼（独立工具：仅改底色） -->
     <style>
-      #eyecarePresets .ecchip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font:600 13px/1.2 system-ui,sans-serif;color:var(--txt);transition:border-color .15s,box-shadow .15s,transform .08s}
+      #eyecarePresets .ecchip{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border:1.5px solid var(--line);border-radius:12px;background:var(--card);cursor:pointer;font:600 13px/1.2 system-ui,sans-serif;color:var(--txt);transition:border-color .15s,box-shadow .15s,background .15s;appearance:none;-webkit-appearance:none}
       #eyecarePresets .ecchip:active{transform:translateY(1px)}
-      #eyecarePresets .ecchip.on{border-color:var(--pri);box-shadow:0 0 0 3px rgba(59,108,255,.18)}
-      #eyecarePresets .ecsw{width:18px;height:18px;border-radius:5px;border:1px solid rgba(0,0,0,.15);background:var(--c,#eee);flex:0 0 auto}
+      #eyecarePresets .ecchip.on{border-width:2px;border-color:var(--pri);background:var(--accent);box-shadow:0 0 0 3px rgba(59,108,255,.15);font-weight:700}
+      #eyecarePresets .ecchip.on .ecsw,#eyecarePresets .ecchip.on .ecsw-input{outline:2.5px solid var(--pri);outline-offset:1.5px}
+      #eyecarePresets .ecsw{width:20px;height:20px;border-radius:5px;border:1px solid rgba(0,0,0,.15);background:var(--c,#eee);flex:0 0 auto}
+      #eyecarePresets .ecsw-input{width:28px;height:28px;padding:2px;border:1px solid rgba(0,0,0,.18);border-radius:6px;background:none;flex:0 0 auto;cursor:pointer}
     </style>
     <div id="eyecareBlock" hidden>
       <p class="label">② 选择护眼底色</p>
       <div class="fname" style="margin-top:8px;color:var(--sub);font-size:12.5px;line-height:1.6">
-        把每页的底色统一叠成下面这个颜色（默认<b>米白道林</b>）。<b>文字、图片保持原样</b>，只是整页染上一层暖色，白底不再刺眼；对<b>文字版</b>与<b>图片 / 扫描版</b> PDF 都有效。选好颜色后点「生成新 PDF」即导出染色版（版式不变）。
+        叠底色，让阅读更护眼，选好颜色即可导出染色版。
       </div>
     </div>
 
@@ -40195,11 +40196,10 @@
         <button type="button" class="ecchip on" data-hex="#F9F3E5" style="--c:#F9F3E5"><span class="ecsw"></span><span class="ect">米白道林</span></button>
         <button type="button" class="ecchip" data-hex="#F7EED6" style="--c:#F7EED6"><span class="ecsw"></span><span class="ect">教材常用</span></button>
         <button type="button" class="ecchip" data-hex="#F5EBCE" style="--c:#F5EBCE"><span class="ecsw"></span><span class="ect">国产道林</span></button>
-        <button type="button" class="ecchip ec-custom" id="eyecareCustomChip" style="--c:conic-gradient(from 0deg,red,orange,#ff0,lime,aqua,blue,magenta,red)"><span class="ecsw" id="eyecareCustomSw"></span><span class="ect">自选颜色</span></button>
+        <button type="button" class="ecchip" data-hex="#F5F2EB" style="--c:#F5F2EB"><span class="ecsw"></span><span class="ect">更浅道林</span></button>
+        <button type="button" class="ecchip ec-custom" id="eyecareCustomChip"><input type="color" id="eyecareColor" class="ecsw-input" value="#f9f3e5"><span class="ect">自选</span></button>
       </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px">
-        <input type="color" id="eyecareColor" value="#f9f3e5"
-               style="width:52px;height:40px;padding:2px;border:1px solid var(--line);border-radius:10px;background:none;cursor:pointer">
+      <div style="margin-top:12px">
         <span id="eyecareHex" style="font-size:13px;color:var(--sub);font-weight:600">米白道林 #F9F3E5 · RGB(249,243,229)</span>
       </div>
     </div>
@@ -40439,9 +40439,8 @@ const eyecareColorEl  = document.getElementById('eyecareColor');
 const eyecareHexEl    = document.getElementById('eyecareHex');
 const eyecarePresets  = document.getElementById('eyecarePresets');
 const eyecareCustomChip = document.getElementById('eyecareCustomChip');
-const eyecareCustomSw   = document.getElementById('eyecareCustomSw');
 // 护眼底色预设（hex 小写 → 名称）
-const EC_PRESETS = { 'f9f3e5':'米白道林', 'f7eed6':'教材常用', 'f5ebce':'国产道林' };
+const EC_PRESETS = { 'f9f3e5':'米白道林', 'f7eed6':'教材常用', 'f5ebce':'国产道林', 'f5f2eb':'更浅道林' };
 // 叠加护眼色：其他工具勾选后才在输出上叠印；默认不勾。
 function updateEcColorVis(){
   const solo = (current === 'eyecare');
@@ -40486,7 +40485,7 @@ function setEyecareActive(hex){
   const key = hex.toLowerCase().replace('#','');
   const isPreset = !!EC_PRESETS[key];
   eyecarePresets.querySelectorAll('.ecchip').forEach(c => {
-    const match = c.dataset.hex && c.dataset.hex.toLowerCase() === hex.toLowerCase();
+    const match = c.dataset.hex && c.dataset.hex.toLowerCase().replace('#','') === key;
     c.classList.toggle('on', !!match);
   });
   if (!isPreset && eyecareCustomChip) eyecareCustomChip.classList.add('on');
@@ -40498,15 +40497,20 @@ function updateEyecareHex(){
   const name = EC_PRESETS[v] || '自选';
   eyecareHexEl.textContent = name + ' #' + v.toUpperCase() + ' · RGB(' + r + ',' + g + ',' + b + ')';
   setEyecareActive(v);
-  if (eyecareCustomSw) eyecareCustomSw.style.background = '#' + v;
 }
-// 点预设色卡 → 写入取色框并刷新；点「自选颜色」→ 直接调起系统取色器
+// 点预设色卡 → 写入取色框并刷新；点「自选」色块 → 直接调起系统取色器
+// 点预设色卡 → 写入取色框并刷新；自选色卡内的取色框(input)由浏览器原生调起，整块不再拦截点击
 if (eyecarePresets) eyecarePresets.querySelectorAll('.ecchip').forEach(c => {
+  if (c.id === 'eyecareCustomChip') return;
   c.addEventListener('click', () => {
-    if (c.id === 'eyecareCustomChip'){ if (eyecareColorEl) eyecareColorEl.click(); return; }
     if (eyecareColorEl) eyecareColorEl.value = c.dataset.hex;
     updateEyecareHex();
   });
+});
+// 自选：点小色块(input)→浏览器原生调起取色器改色；点外框/“自选”文字→仅整体高亮（选中当前已调好的自选色，便于多本书复用，无需每次重开取色器）
+if (eyecareCustomChip) eyecareCustomChip.addEventListener('click', (e) => {
+  if (e.target === eyecareColorEl) return;
+  setEyecareActive('__custom__');
 });
 if (eyecareColorEl) eyecareColorEl.addEventListener('input', updateEyecareHex);
 
@@ -41588,12 +41592,22 @@ async function pagenumGenerate(){
   }
 }
 
+// 护眼文件名后缀：按所选底色区分
+function ecFileSuffix(hex){
+  const v = (hex || '').toLowerCase().replace('#','');
+  if (v === 'f9f3e5') return '_米白护眼';
+  if (v === 'f7eed6') return '_课本护眼';
+  if (v === 'f5ebce') return '_国产道林';
+  if (v === 'f5f2eb') return '_浅护眼';
+  return '_自选护眼';
+}
+
 // 生成收尾：若勾选“叠加护眼色”且当前主工具可叠加，先在输出文档上叠印护眼，再保存下载。
 async function finalizeDoc(out, baseName){
   let name = baseName;
   if (ecOverlayChk && ecOverlayChk.checked){
     await applyEyecareToDoc(out, eyecareColorEl && eyecareColorEl.value);
-    name = baseName.replace(/\.pdf$/i, '_护眼.pdf');
+    name = baseName.replace(/\.pdf$/i, ecFileSuffix(eyecareColorEl && eyecareColorEl.value) + '.pdf');
   }
   const outBytes = await out.save();
   doDownload(new Blob([outBytes], { type:'application/pdf' }), name);
@@ -41603,8 +41617,9 @@ async function finalizeDoc(out, baseName){
 // 成功提示后缀：叠加护眼时附一句说明
 function ecSuffix(){
   if (ecOverlayChk && ecOverlayChk.checked){
-    const hv = (eyecareColorEl && eyecareColorEl.value || '#f9f3e5').toUpperCase().replace('#','');
-    return '\n🌿 已叠加护眼底色 #' + hv + '。';
+    const v = (eyecareColorEl && eyecareColorEl.value || '#f9f3e5').toLowerCase().replace('#','');
+    const label = ({ f9f3e5:'米白护眼', f7eed6:'课本护眼', f5ebce:'国产道林', f5f2eb:'浅护眼' })[v] || '自选护眼';
+    return '\n🌿 已叠加' + label + '（#' + v.toUpperCase() + '）。';
   }
   return '';
 }
@@ -41619,7 +41634,7 @@ async function eyecareGenerate(){
   const outBytes = await src.save();
   const blob = new Blob([outBytes], { type:'application/pdf' });
   const base = fileObj.name.replace(/\.pdf$/i, '');
-  doDownload(blob, base + '_护眼.pdf');
+  doDownload(blob, base + ecFileSuffix(eyecareColorEl && eyecareColorEl.value) + '.pdf');
   msgEl.textContent = '✅ 已完成：' + pages.length + ' 页底色叠成护眼色，开始下载（仅染色，版式不变）。';
 }
 
