@@ -224,6 +224,12 @@
             <div class="t">A4 切小</div>
             <div class="d">把内容按内页尺寸放进 A4 打印。</div>
           </div>
+          <div class="mode" data-mode="edgeplace">
+            <span class="tick">✓</span>
+            <div class="ic">📐</div>
+            <div class="t">靠边放放</div>
+            <div class="d">非标准比例内页，最大化靠边放进 A4 / 大B5。</div>
+          </div>
           <div class="mode" data-mode="editpdf">
             <span class="tick">✓</span>
             <div class="ic">🧩</div>
@@ -309,6 +315,18 @@
       <div id="a4tob5Note" style="margin-top:6px;font-size:12.5px;color:#9aa3b2">
         <b>居中</b>：内容居中放进 B5 白框，A4 打印后沿框裁四周白边得 B5。<br>
         <b>顶格左右交替</b>：B5 框顶齐贴纸上边，奇数页靠左、偶数页靠右；
+      </div>
+    </div>
+
+    <!-- 靠边放放 -->
+    <div id="edgeplaceBlock" hidden>
+      <p class="label">② 摆放底页尺寸（内容最大化放进去并靠边）</p>
+      <div class="seg" id="edgeplaceSeg">
+        <div class="opt on" data-size="a4">A4（210 × 297 mm）</div>
+        <div class="opt" data-size="b5">大 B5（182 × 257 mm）</div>
+      </div>
+      <div id="edgeplaceNote" style="margin-top:10px;font-size:12.5px;color:#9aa3b2">
+        将非标准比例 PDF（窄于 A5 等），按原比例最大化适配 A4/B5，<b>奇数页靠右、偶数页靠左</b>，适配左册装订。
       </div>
     </div>
 
@@ -632,6 +650,7 @@ const TOOL_META = {
   cover:   {ic:'📔', name:'书皮', d:'上传封面/封底，自动出 PDF（含书脊）。', intro:'书皮：上传封面、封底图片，自动拼成含书脊的成品书皮 PDF，可直接送印。'},
   extract: {ic:'✂️', name:'提取', d:'按页码取单页，或导出首尾两页。', intro:'提取：按页码挑出单页，或一键导出 PDF 的首页 / 尾页。'},
   a4tob5:  {ic:'🗐', name:'A4 切小', d:'把内容按内页尺寸放进 A4 打印。', intro:'A4 切小：把小尺寸内页（如 B5）按比例放到 A4 纸上排版，方便用 A4 打印机输出后裁切。'},
+  edgeplace: {ic:'📐', name:'靠边放放', d:'非标准比例内页，最大化靠边放进 A4 / 大B5。', intro:'靠边放放：把比例非标准（如比 A5 更窄）的 PDF 每页按原比例最大化放进 A4 或大B5 纸张，靠边摆放（奇数页靠右、偶数页靠左，垂直居中），左册装订不影响阅读。可叠加护眼色。'},
   editpdf: {ic:'🧩', name:'增删PDF', d:'批量增、删、替换页面。', intro:'增删 PDF：批量给 PDF 增加、删除或替换指定页面，整理成新文件。'},
   pagenum:  {ic:'🔢', name:'标记页码', d:'给指定页码范围加页码（底部居中 / 页角）。', intro:'标记页码：给 PDF 指定页码范围（如 3～109）的每一页底部加上页码，从开始页起以 1 自增（第 3 页显示 1）。底部居中：页码水平居中、距底边 1cm；页角：按原 PDF 页码奇偶，奇数页右下、偶数页左下，距底边 1cm、距外侧边 1cm。默认字体 Arial（以 Helvetica 替代，字形一致）、黑色，居中 8pt / 页角 9pt。'},
   eyecare: {ic:'🌿', name:'假装护眼', d:'把页面白底换成柔和的护眼纸色（米白道林/教材色/浅米道林/自选），久看不刺眼。', intro:'假装护眼：把每页底色叠成柔和纸色（米白道林 / 教材常用 / 浅米道林 / 自选），白底不再刺眼，文字图片不变。'},
@@ -667,7 +686,7 @@ function alignSteps(){
   const railRect = stepperEl.getBoundingClientRect();
   const centerOf = el => { if (!el) return null; const r = el.getBoundingClientRect(); return (r.top + r.height/2) - railRect.top; };
   const m = document.getElementById('modes');
-  const blk = [pdfBlock, coverBlock, a4tob5Block, extractBlock, editpdfBlock, eyecareBlock, unfoldBlock, pagenumBlock].find(b => b && !b.hidden) || pdfBlock;
+  const blk = [pdfBlock, coverBlock, a4tob5Block, edgeplaceBlock, extractBlock, editpdfBlock, eyecareBlock, unfoldBlock, pagenumBlock].find(b => b && !b.hidden) || pdfBlock;
   const labels = blk ? blk.querySelectorAll('.label') : [];
   const tops = [
     centerOf(m),
@@ -736,6 +755,8 @@ const uploadPagesEl = document.getElementById('uploadPages');
 const a4tob5Block  = document.getElementById('a4tob5Block');
 const a4tob5How    = document.getElementById('a4tob5How');
 const a4tob5Seg    = document.getElementById('a4tob5Seg');
+const edgeplaceBlock = document.getElementById('edgeplaceBlock');
+const edgeplaceSeg   = document.getElementById('edgeplaceSeg');
 const a4tob5PlaceEl = document.getElementById('a4tob5Place');
 const a4tob5ScaleEl = document.getElementById('a4tob5Scale');
 // 增删 PDF
@@ -794,6 +815,7 @@ let editpdfRepFileObj = null;
 let extractOut = 'merged';
 let pnPos = 'center';
 let a4tob5Size = 'small';
+let edgeplaceSize = 'a4';
 let a4tob5PlaceMode = 'edge';
 let a4tob5ScaleK66 = false;
 let filePages = 0;
@@ -872,6 +894,7 @@ function showMode(mode){
   const isCover = (mode === 'cover');
   const isExtract = (mode === 'extract');
   const isA4tob5 = (mode === 'a4tob5');
+  const isEdgeplace = (mode === 'edgeplace');
   const isEditpdf = (mode === 'editpdf');
   const isUnfold = (mode === 'unfold');
   const isPagenum = (mode === 'pagenum');
@@ -879,6 +902,7 @@ function showMode(mode){
   pdfBlock.hidden    = isCover;
   coverBlock.hidden  = !isCover;
   a4tob5Block.hidden  = !isA4tob5;
+  edgeplaceBlock.hidden = !isEdgeplace;
   extractBlock.hidden = !isExtract;
   editpdfBlock.hidden = !isEditpdf;
   eyecareBlock.hidden = !isEyecare;                       // 独立护眼工具的说明
@@ -1031,6 +1055,13 @@ a4tob5Seg.querySelectorAll('.opt').forEach(o => {
     a4tob5Seg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
     o.classList.add('on');
     a4tob5Size = o.dataset.size;
+  };
+});
+edgeplaceSeg.querySelectorAll('.opt').forEach(o => {
+  o.onclick = () => {
+    edgeplaceSeg.querySelectorAll('.opt').forEach(x => x.classList.remove('on'));
+    o.classList.add('on');
+    edgeplaceSize = o.dataset.size;
   };
 });
 a4tob5PlaceEl.querySelectorAll('.opt').forEach(o => {
@@ -1588,41 +1619,22 @@ async function a4tob5Generate(){
     const src = await loadPdf(fileObj);
     const N = src.getPageCount();
 
-    // —— 膨胀预检 + 路由 ——
-    // pdf-lib 对部分图片型 PDF（iText 生成、含软遮罩/特殊压缩图）重新封装时会把图片解压成未压缩数据，
-    // 导致输出暴胀到几百 MB（可达源文件的十几倍），浏览器在内存中撑出大文件时直接卡死/崩溃（表现成"点了没反应"）。
-    // 先探测单页封装成本，估算总输出体积，并和源文件比"膨胀倍数"：
-    //   · 仅当「输出远大于输入（膨胀≥3 倍）且输出确实很大（>100MB）」判定为 pdf-lib 解压 bug → 改用栅格化降级（不再硬拦）；
-    //   · 正常大文件（如 100~200MB 的扫描书，pdf-lib 能原样保留压缩，输出≈输入）一律走矢量路径，不会误杀。
-    // 命中膨胀时不再硬撑（会把浏览器卡死），直接给出可执行的建议
-    let bloatMB = 0, bloatRatio = 0;
-    try {
-      const probe = await PDFDocument.create();
-      const _sz = src.getPage(0).getSize();
-      const pw = _sz.width, ph = _sz.height;
-      const p0 = await safeEmbedPage(probe, src, src.getPage(0));
-      const pp = probe.addPage([pw, ph]);
-      pp.drawPage(p0, { x:0, y:0, width:pw, height:ph });
-      const probeBytes = await probe.save();
-      const estMB = (probeBytes.length * N) / (1024 * 1024);
-      const inputMB = fileObj.size / (1024 * 1024);
-      const ratio = estMB / Math.max(inputMB, 0.1);
-      if (ratio >= 3 && estMB > 100){ bloatMB = estMB; bloatRatio = ratio; }
-    } catch (e) { /* 预检本身出错则跳过，走矢量 */ }
-    if (bloatMB > 0){
-      throw new Error('这个文件的图片是特殊压缩格式，切小后体积会膨胀到约 ' + Math.round(bloatMB)
-        + ' MB（约源文件的 ' + Math.round(bloatRatio) + ' 倍），浏览器会直接卡死。\n'
-        + '建议二选一：① 先用 Adobe Acrobat / 在线压缩工具把 PDF 里的图片重新压一遍再回来切；'
-        + '② 改用「拼版折书」类工具——它们不重排页面内容，输出体积与源文件基本相当。');
+    // 旋转页会让"缩放 + 平移"的坐标基准错乱，先明确拦下（书类内页几乎不会有）
+    for (let i = 0; i < N; i++){
+      const rot = src.getPage(i).getRotation().angle % 360;
+      if (rot !== 0){
+        throw new Error('这个 PDF 第 ' + (i + 1) + ' 页带旋转（' + rot + '°），暂不支持 A4 切小。\n请先用 PDF 工具把页面旋转"应用/拍平"后再试。');
+      }
     }
 
+    // ★ 用 copyPages 原样搬运整页：图片流不重新编码 → 体积≈源文件、清晰度零损失。
+    //   不用 embedPage + drawPage（会重封装图片，PNG 位图型 PDF 会暴胀数倍甚至卡死）。
     const out = await PDFDocument.create();
-
-    for (let i = 0; i < N; i++){
-      const cb = visibleBoxOf(src.getPage(i));
-      const cbw = cb.width, cbh = cb.height;
-      const scale = Math.min(bw / cbw, bh / cbh);         // 按原比例放进 B5 框（contain，不变形）
-      const dW = cbw * scale, dH = cbh * scale;
+    const pages = await out.copyPages(src, src.getPageIndices());
+    pages.forEach((page, i) => {
+      const { width: ow, height: oh } = page.getSize();
+      const scale = Math.min(bw / ow, bh / oh);           // 按原比例放进 B5 框（contain，不变形）
+      const dW = ow * scale, dH = oh * scale;
       let boxX, boxY;
       if (edge){
         // 顶格：B5 框贴纸张上边；奇数页贴左边、偶数页贴右边
@@ -1632,16 +1644,74 @@ async function a4tob5Generate(){
         boxX = (a4w - bw) / 2; boxY = (a4h - bh) / 2;     // 居中
       }
       const dx = boxX + (bw - dW) / 2, dy = boxY + (bh - dH) / 2;
-      const page = out.addPage([a4w, a4h]);
-      page.drawRectangle({ x:0, y:0, width:a4w, height:a4h, color: rgb(1,1,1) });   // 白底
-      const emb = await safeEmbedPage(out, src, src.getPage(i));
-      page.drawPage(emb, { x:dx, y:dy, width:dW, height:dH });
-    }
+      // 顺序不可颠倒：先 scaleContent 再 translateContent，最终 x' = scale*x + dx
+      page.scaleContent(scale, scale);
+      page.translateContent(dx, dy);
+      page.setSize(a4w, a4h);
+      // 旧裁剪框会盖掉放大后的内容，删掉让它回落到 MediaBox
+      try { page.node.delete(PDFName.of('CropBox')); } catch (e) {}
+      out.addPage(page);
+    });
     await finalizeDoc(out, 'A4切小_' + fileObj.name);
     const placeTip = edge
       ? `顶格左右交替：内页框贴纸张上边，奇数页贴左边、偶数页贴右边。\n用 A4 纸「沿长边双面」打印后，沿【右边 + 下边】两刀裁切即得 ${SIZELABEL[key]}，无需裁四边。`
       : `已居中放进 A4 上的 ${bwMm}×${bhMm} mm（${SIZELABEL[key]}）白框内${K66 > 1 ? '（已 66党放大，小程序压完回到真实尺寸）' : ''}。\n用 A4 纸打印后，沿内页框裁掉四周白边，即得 ${SIZELABEL[key]} 大小资料。`;
     msgEl.textContent = `✅ 已生成：${N} 页内容，输出为 ${bwMm}×${bhMm} mm（${SIZELABEL[key]}${K66 > 1 ? '，已66党放大' : ''}）的 A4 打印稿。\n${placeTip}` + ecSuffix();
+  } catch (e) {
+    msgEl.textContent = '出错了：' + e;
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
+// 靠边放放：非标准比例内页，按原比例最大化放入所选底页（A4 / 大B5），靠边摆放（奇数页靠右、偶数页靠左，垂直居中）。
+async function edgeplaceGenerate(){
+  if (!fileObj){ msgEl.textContent = '请先选一个 PDF 文件'; return; }
+  if (isHarmonyOS && (inWeChat || inQQ)){
+    msgEl.textContent = '⚠️ 当前是鸿蒙系统的微信 / QQ 内置浏览器，无法直接保存文件。\n请点右上角「···」→「在浏览器打开」（华为浏览器或 Chrome），重新打开本页后再点“生成新 PDF”即可下载。';
+    return;
+  }
+  btnEl.disabled = true;
+  msgEl.textContent = '处理中…（PDF 越大越慢，请稍候）';
+  try {
+    const MM = 2.834645669;
+    const PAPERS = { a4:[210,297], b5:[182,257] };        // 底页尺寸（mm）
+    const PAPELABEL = { a4:'A4', b5:'大B5' };
+    const key = edgeplaceSize;
+    const [pwMm, phMm] = PAPERS[key];
+    const pw = pwMm * MM, ph = phMm * MM;                 // 底页（pt）
+    const src = await loadPdf(fileObj);
+    const N = src.getPageCount();
+
+    // 旋转页会让"缩放 + 平移"的坐标基准错乱，先明确拦下（书类内页几乎不会有）
+    for (let i = 0; i < N; i++){
+      const rot = src.getPage(i).getRotation().angle % 360;
+      if (rot !== 0){
+        throw new Error('这个 PDF 第 ' + (i + 1) + ' 页带旋转（' + rot + '°），暂不支持靠边放放。\n请先用 PDF 工具把页面旋转"应用/拍平"后再试。');
+      }
+    }
+
+    // ★ 用 copyPages 原样搬运整页：图片流不重新编码 → 体积≈源文件、清晰度零损失。
+    //   不用 embedPage + drawPage（会重封装图片，PNG 位图型 PDF 会暴胀数倍甚至卡死）。
+    const out = await PDFDocument.create();
+    const pages = await out.copyPages(src, src.getPageIndices());
+    pages.forEach((page, i) => {
+      const { width: ow, height: oh } = page.getSize();
+      const scale = Math.min(pw / ow, ph / oh);            // contain 最大化（不变形）
+      const dW = ow * scale, dH = oh * scale;
+      const odd = (i % 2 === 0);                           // 第 1,3,5… 页为奇数页
+      const dx = odd ? (pw - dW) : 0;                      // 奇数页靠右、偶数页靠左
+      const dy = (ph - dH) / 2;                            // 垂直居中
+      // 顺序不可颠倒：先 scaleContent 再 translateContent，最终 x' = scale*x + dx
+      page.scaleContent(scale, scale);
+      page.translateContent(dx, dy);
+      page.setSize(pw, ph);
+      // 旧裁剪框会盖掉放大后的内容，删掉让它回落到 MediaBox
+      try { page.node.delete(PDFName.of('CropBox')); } catch (e) {}
+      out.addPage(page);
+    });
+    await finalizeDoc(out, '靠边放放_' + fileObj.name);
+    msgEl.textContent = `✅ 已生成：${N} 页内容，每页按原比例最大化放入 ${PAPELABEL[key]}（${pwMm}×${phMm} mm），奇数页靠右、偶数页靠左（垂直居中）。\n用 ${PAPELABEL[key]} 纸打印后，沿内容外侧边裁切即可，左册装订不影响阅读。` + ecSuffix();
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
   } finally {
@@ -1845,7 +1915,7 @@ async function unfoldGenerate(){
 // —— 现在它既是“叠加图层”（可被拼版/页面工具叠加），也可勾选“仅护眼”单独导出染色版。
 
 // 可叠加护眼的主工具范围（拼版折书 + 页面工具；书皮不在内）
-const EC_STACKABLE = new Set(['fold','booklet','fold4','fold6','extract','a4tob5','editpdf','unfold','pagenum']);
+const EC_STACKABLE = new Set(['fold','booklet','fold4','fold6','extract','a4tob5','edgeplace','editpdf','unfold','pagenum']);
 
 // 核心：给任意 PDFDocument 的每一页追加一层 Multiply 护眼叠印矩形（原地修改 doc）。
 async function applyEyecareToDoc(doc, hex){
@@ -2015,6 +2085,7 @@ btnEl.onclick = async () => {
   if (current === 'extract'){ await extractGenerate(); afterGen(); return; }
   if (current === 'cover'){ await coverGenerate(); afterGen(); return; }
   if (current === 'a4tob5'){ await a4tob5Generate(); afterGen(); return; }
+  if (current === 'edgeplace'){ await edgeplaceGenerate(); afterGen(); return; }
   if (current === 'eyecare'){ await eyecareGenerate(); afterGen(); return; }
   if (current === 'unfold'){ await unfoldGenerate(); afterGen(); return; }
   if (current === 'pagenum'){ await pagenumGenerate(); afterGen(); return; }
