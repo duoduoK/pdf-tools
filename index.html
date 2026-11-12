@@ -1710,7 +1710,7 @@ async function edgeplaceGenerate(){
       try { page.node.delete(PDFName.of('CropBox')); } catch (e) {}
       out.addPage(page);
     });
-    await finalizeDoc(out, '靠边放放_' + fileObj.name);
+    await finalizeDoc(out, '靠边_' + fileObj.name);
     msgEl.textContent = `✅ 已生成：${N} 页内容，每页按原比例最大化放入 ${PAPELABEL[key]}（${pwMm}×${phMm} mm），奇数页靠右、偶数页靠左（垂直居中）。\n用 ${PAPELABEL[key]} 纸打印后，沿内容外侧边裁切即可，左册装订不影响阅读。` + ecSuffix();
   } catch (e) {
     msgEl.textContent = '出错了：' + e;
